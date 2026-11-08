@@ -1,0 +1,213 @@
+{
+ "protocol": {
+  "selection": "lowest mean validation MAE over horizons [3, 12]",
+  "search_train_subsample": "every 2nd as-of time",
+  "strategy_subsample": "every 4th as-of time (train and validation)",
+  "early_stopping": "validation MAE, patience 50, max 3000 rounds",
+  "test_set": "not loaded"
+ },
+ "base_params": {
+  "objective": "l2",
+  "metric": [
+   "l1",
+   "l2"
+  ],
+  "learning_rate": 0.1,
+  "feature_fraction": 0.8,
+  "bagging_fraction": 0.8,
+  "bagging_freq": 1,
+  "max_bin": 255,
+  "num_threads": 8,
+  "seed": 0,
+  "deterministic": true,
+  "verbose": -1
+ },
+ "search": [
+  {
+   "config": {
+    "num_leaves": 63,
+    "min_data_in_leaf": 200,
+    "objective": "l2"
+   },
+   "horizons": {
+    "h3": {
+     "mae": 2.6805132889944008,
+     "rmse": 4.837016252806532,
+     "best_iteration": 638,
+     "seconds": 45.9
+    },
+    "h12": {
+     "mae": 3.6458188502936584,
+     "rmse": 6.775402057428026,
+     "best_iteration": 602,
+     "seconds": 38.8
+    }
+   },
+   "mean_mae": 3.1631660696440296
+  },
+  {
+   "config": {
+    "num_leaves": 255,
+    "min_data_in_leaf": 200,
+    "objective": "l2"
+   },
+   "horizons": {
+    "h3": {
+     "mae": 2.6683511174443573,
+     "rmse": 4.829274968358042,
+     "best_iteration": 235,
+     "seconds": 32.1
+    },
+    "h12": {
+     "mae": 3.63901776828933,
+     "rmse": 6.78850422107906,
+     "best_iteration": 177,
+     "seconds": 24.8
+    }
+   },
+   "mean_mae": 3.153684442866844
+  },
+  {
+   "config": {
+    "num_leaves": 255,
+    "min_data_in_leaf": 1000,
+    "objective": "l2"
+   },
+   "horizons": {
+    "h3": {
+     "mae": 2.683718247447144,
+     "rmse": 4.84621615667161,
+     "best_iteration": 239,
+     "seconds": 42.5
+    },
+    "h12": {
+     "mae": 3.6426342557605627,
+     "rmse": 6.784307237877908,
+     "best_iteration": 158,
+     "seconds": 31.0
+    }
+   },
+   "mean_mae": 3.1631762516038533
+  },
+  {
+   "config": {
+    "num_leaves": 127,
+    "min_data_in_leaf": 500,
+    "objective": "l2"
+   },
+   "horizons": {
+    "h3": {
+     "mae": 2.677790597390426,
+     "rmse": 4.83631234063796,
+     "best_iteration": 372,
+     "seconds": 37.9
+    },
+    "h12": {
+     "mae": 3.6379959457311264,
+     "rmse": 6.7758581118938634,
+     "best_iteration": 349,
+     "seconds": 34.5
+    }
+   },
+   "mean_mae": 3.157893271560776
+  },
+  {
+   "config": {
+    "num_leaves": 127,
+    "min_data_in_leaf": 500,
+    "objective": "l2",
+    "feature_fraction": 0.6
+   },
+   "horizons": {
+    "h3": {
+     "mae": 2.680633681556069,
+     "rmse": 4.833452297753769,
+     "best_iteration": 582,
+     "seconds": 52.3
+    },
+    "h12": {
+     "mae": 3.6402618337237067,
+     "rmse": 6.755555574955662,
+     "best_iteration": 381,
+     "seconds": 34.5
+    }
+   },
+   "mean_mae": 3.160447757639888
+  },
+  {
+   "config": {
+    "num_leaves": 127,
+    "min_data_in_leaf": 500,
+    "objective": "l1"
+   },
+   "horizons": {
+    "h3": {
+     "mae": 2.558863807888064,
+     "rmse": 5.023723335088089,
+     "best_iteration": 1323,
+     "seconds": 153.1
+    },
+    "h12": {
+     "mae": 3.388182991771482,
+     "rmse": 7.004730430212891,
+     "best_iteration": 890,
+     "seconds": 145.9
+    }
+   },
+   "mean_mae": 2.973523399829773
+  }
+ ],
+ "chosen": {
+  "num_leaves": 127,
+  "min_data_in_leaf": 500,
+  "objective": "l1"
+ },
+ "strategy": {
+  "per_horizon": {
+   "h3": {
+    "mae": 2.6103711049791243,
+    "rmse": 5.116769366630374,
+    "best_iteration": 1112,
+    "seconds": 64.4
+   },
+   "h6": {
+    "mae": 2.9785702560449177,
+    "rmse": 6.059232165054006,
+    "best_iteration": 896,
+    "seconds": 52.7
+   },
+   "h9": {
+    "mae": 3.224047952785966,
+    "rmse": 6.6256897049427526,
+    "best_iteration": 1178,
+    "seconds": 71.3
+   },
+   "h12": {
+    "mae": 3.408421649689382,
+    "rmse": 7.030907035047467,
+    "best_iteration": 1167,
+    "seconds": 67.0
+   }
+  },
+  "stacked": {
+   "best_iteration": 1133,
+   "seconds": 251.0,
+   "h3": {
+    "mae": 2.6516668126809053,
+    "rmse": 5.095309516850539
+   },
+   "h6": {
+    "mae": 2.975466375582592,
+    "rmse": 6.006939076314687
+   },
+   "h9": {
+    "mae": 3.1951398513627836,
+    "rmse": 6.5742153427670456
+   },
+   "h12": {
+    "mae": 3.364845286589037,
+    "rmse": 6.963099424925551
+   }
+  }
+ }
+}

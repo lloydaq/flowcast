@@ -83,7 +83,7 @@ def main() -> None:
         "peak_rss_mb": peak // MB if peak else None,
     }
     summary["runtime_s"] = round(time.perf_counter() - started, 1)
-    SUMMARY_PATH.write_text(json.dumps(summary, indent=2))
+    SUMMARY_PATH.write_text(json.dumps(summary, indent=2), encoding="utf-8")
     brief = {k: v for k, v in summary.items() if k not in ("features", "splits")}
     brief["splits"] = {
         s: {k: v for k, v in d.items() if k != "feature_missing_pct"} for s, d in summary["splits"].items()

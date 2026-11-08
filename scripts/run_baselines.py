@@ -88,9 +88,9 @@ def main() -> None:
         "runtime_s": round(time.perf_counter() - started, 1),
     }
     METRICS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    METRICS_PATH.write_text(json.dumps(payload, indent=1))
-    REPORT_PATH.write_text(render(results))
-    print(REPORT_PATH.read_text())
+    METRICS_PATH.write_text(json.dumps(payload, indent=1), encoding="utf-8")
+    REPORT_PATH.write_text(render(results), encoding="utf-8")
+    print(REPORT_PATH.read_text(encoding="utf-8"))
     print(f"runtime {payload['runtime_s']} s")
 
 

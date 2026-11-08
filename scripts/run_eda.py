@@ -369,7 +369,7 @@ def main() -> None:
         "note": "validation contains Memorial Day (2012-05-28, a Monday holiday)",
     }
 
-    SUMMARY_PATH.write_text(json.dumps(s, indent=2, default=str))
+    SUMMARY_PATH.write_text(json.dumps(s, indent=2, default=str), encoding="utf-8")
     print(json.dumps(s, indent=2, default=str))
 
 

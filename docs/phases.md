@@ -11,8 +11,8 @@ Related: [architect.md](architect.md) · [memory.md](memory.md)
 | 2 | Exploratory data analysis | ✅ done | `8665a3b` |
 | 3 | Feature engineering | ✅ done | `ea342c8` |
 | 4 | Baselines and evaluation framework | ✅ done | see git log |
-| 5 | LightGBM | ⏭ next | |
-| 6 | Graph deep learning (DCRNN) | planned | |
+| 5 | LightGBM | ✅ done | see git log |
+| 6 | Graph deep learning (DCRNN) | ⏭ next | |
 | 7 | Backend (FastAPI) | planned | |
 | 8 | Frontend (React) | planned | |
 | 9 | Integration and testing | planned | |
@@ -96,7 +96,10 @@ Related: [architect.md](architect.md) · [memory.md](memory.md)
 - Reported on validation, plus one test-period score per baseline, recorded as the floor to beat.
 - **Exit:** a results table built from committed JSON, plus `docs/experiments.md` started.
 
-## Phase 5 — LightGBM
+## Phase 5 — LightGBM ✅
+
+Result: beats the floor at every horizon (validation MAE 2.53–3.36 vs 3.15–3.98); see [experiments.md](experiments.md) §3 and the [model card](model_card_lightgbm.md). Intervals deferred.
+
 
 - One global model per horizon, on CPU. Compared against a multi-output alternative on validation.
 - Hyperparameter search on validation only, with early stopping on validation. The test period is scored once.

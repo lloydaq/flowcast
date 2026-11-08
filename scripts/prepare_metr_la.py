@@ -101,7 +101,7 @@ def main() -> None:
         name: {"t0_first": str(a[0]), "t0_last": str(a[1]), "owned_period": [str(p) for p in periods[name]]}
         for name, a in series.anchors.items()
     }
-    paths.SPLITS_PATH.write_text(json.dumps(splits, indent=2))
+    paths.SPLITS_PATH.write_text(json.dumps(splits, indent=2), encoding="utf-8")
 
     memory["speed_matrix_mb"] = round(speed.nbytes / MB, 1)
     memory["end_rss_mb"] = rss_mb()
@@ -109,7 +109,7 @@ def main() -> None:
     memory["peak_rss_mb"] = peak // MB if peak else None
     report["memory"] = memory
     report["runtime_s"] = round(time.perf_counter() - started, 1)
-    paths.REPORT_PATH.write_text(json.dumps(report, indent=2, default=str))
+    paths.REPORT_PATH.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
 
     print(json.dumps(report, indent=2, default=str))
     print(f"\nwrote {paths.PROCESSED_DIR}")

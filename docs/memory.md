@@ -2,7 +2,7 @@
 
 Persistent context for anyone continuing this project: the developer, another engineer, Claude Code or ChatGPT. Read this first. It records **verified facts, decisions and conventions** that are not obvious from the code. Update it at the end of every phase.
 
-Last updated: 2026-11-08 (Phase 4 complete). Current state: Phase 5 (LightGBM) is next. See [phases.md](phases.md).
+Last updated: 2026-11-08 (Phase 5 complete). Current state: Phase 6 (graph deep learning) is next. See [phases.md](phases.md).
 
 ## Hard constraints
 
@@ -50,6 +50,9 @@ Last updated: 2026-11-08 (Phase 4 complete). Current state: Phase 5 (LightGBM) i
 | 2026-11-08 | Slices use the **target** time; peak = weekdays 07:00–09:59 and 15:00–18:59; congested = target < 0.6 × free-flow | Peak hours are where the training weekday mean speed dips below ~53 mph |
 | 2026-11-08 | Baselines fall back to the historical average when their own input is missing, and the fallback share is reported | Every model scores the same rows |
 | 2026-11-08 | Floor to beat = the best baseline per horizon (AR on residuals for MAE/RMSE). Test scores were computed once in Phase 4 | Baselines have nothing to tune, so a test score is a fair floor |
+| 2026-11-08 | LightGBM: one direct global model per horizon; L1 objective, 127 leaves, min leaf 500, lr 0.05 | L1 beat every L2 config by ~7% MAE (RMSE ~3–4% worse, still below floor); stacked model was within ~1.6% and needs 4× memory |
+| 2026-11-08 | LightGBM checkpoints in `models/checkpoints/lightgbm/` (git-ignored, ~140 MB); predictions in `data/processed/predictions/` | Reproducible from `scripts/train_lightgbm.py` (~60 min) |
+| 2026-11-08 | Prediction intervals deferred | Optional in Phase 5; need their own calibration check |
 | *open* | PostgreSQL vs Parquet-only backend | Decide before Phase 7 ([architect.md](architect.md) §6) |
 
 ## Conventions
@@ -68,7 +71,9 @@ python scripts/prepare_metr_la.py   # rebuild data/processed/ (~33 s with a warm
 python scripts/run_eda.py           # rebuild EDA figures and docs/eda_summary.json
 python scripts/build_features.py    # data/processed/features/{split}.parquet (~34 s, 2.3 GB peak)
 python scripts/run_baselines.py     # models/metrics/baselines.json + docs/baseline_results.md (~23 s)
-pytest                              # 54 tests at end of Phase 4
+python scripts/tune_lightgbm.py     # validation-only search -> models/metrics/lightgbm_search.json (~35 min)
+python scripts/train_lightgbm.py    # final models, test scored once, model card + figures (~60 min)
+pytest                              # 59 tests at end of Phase 5
 ruff check . ; ruff format --check .
 ```
 
@@ -81,4 +86,7 @@ ruff check . ; ruff format --check .
 - The official windows only reach back 11 steps (`x_t-11`); `speed_lag12` has no official counterpart.
 - Feature tables are float32: compare with a tolerance (~1e-4 mph), not `==`.
 - The seasonal-naive baseline falls back on 14% of test rows (week-ago readings lost to outages), against 3% in validation.
+- Always pass `encoding="utf-8"` to `read_text`/`write_text`: Windows defaults to cp1252 and fails on `→`/`✅` (it once emptied README.md and once crashed the model-card write after a 60-min run).
+- Use `.venv/Scripts/python`, not bare `python` (the system Python is 3.14 / a Store stub).
+- psutil `rss` is current memory, not peak; on Windows use `memory_info().peak_wset`.
 - Validation contains Memorial Day (Mon 2012-05-28). Training has no US federal holidays.

@@ -28,7 +28,7 @@ def load_speed(split: str | None = None) -> pd.DataFrame:
 def owned_period(split: str) -> tuple[pd.Timestamp, pd.Timestamp]:
     if split not in SPLITS:
         raise ValueError(f"unknown split {split!r}; expected one of {SPLITS}")
-    splits = json.loads(paths.SPLITS_PATH.read_text())
+    splits = json.loads(paths.SPLITS_PATH.read_text(encoding="utf-8"))
     start, end = splits[split]["owned_period"]
     return pd.Timestamp(start), pd.Timestamp(end)
 
