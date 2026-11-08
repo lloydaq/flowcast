@@ -99,7 +99,8 @@ All models implement one interface:
 ```python
 class Forecaster(Protocol):
     name: str
-    horizons: tuple[int, ...]           # steps ahead: (3, 6, 9, 12)
+    horizons: tuple[int, ...]  # steps ahead: (3, 6, 9, 12)
+
     def predict(self, history: pd.DataFrame, as_of: pd.Timestamp) -> pd.DataFrame:
         """history: speed matrix with readings <= as_of only. Returns (sensor × horizon) mph."""
 ```

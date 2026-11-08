@@ -8,8 +8,9 @@
 |---|---|---|
 | 1 | Dataset acquisition, reconstruction, validation | ✅ done |
 | 2 | Exploratory data analysis ([report](docs/eda.md)) | ✅ done |
-| 3 | Feature engineering | next |
-| 4–6 | Baselines, LightGBM, graph deep learning | planned |
+| 3 | Feature engineering ([features](docs/features.md)) | ✅ done |
+| 4 | Baselines and evaluation | next |
+| 5–6 | LightGBM, graph deep learning | planned |
 | 7–10 | FastAPI backend, React dashboard, integration, release | planned |
 
 ## Setup (Windows / PowerShell)
@@ -23,6 +24,7 @@ pip install -r requirements.txt
 
 python scripts/prepare_metr_la.py   # downloads ~230 MB once, writes data/processed/
 python scripts/run_eda.py           # EDA figures -> docs/figures/eda, numbers -> docs/eda_summary.json
+python scripts/build_features.py    # point-in-time feature tables -> data/processed/features/
 pytest                              # unit tests + data integration tests
 ruff check .
 ```
@@ -37,10 +39,13 @@ src/flowcast/data/validation.py   data-quality checks and statistics
 scripts/prepare_metr_la.py        end-to-end acquisition + validation pipeline
 tests/                            unit tests (synthetic) and data integration tests
 src/flowcast/data/processed.py    load processed speed matrix / sensors per split
+src/flowcast/congestion.py        shared free-flow / congestion definitions
+src/flowcast/features/build.py    point-in-time features and targets (leakage-tested)
 src/flowcast/analysis/eda.py      EDA statistics (congestion, profiles, autocorrelation, spatial)
 scripts/run_eda.py                EDA figures and summary (training period only)
 docs/dataset.md                   verified dataset documentation
 docs/eda.md                       EDA report
+docs/features.md                  feature definitions, leakage guarantees, table sizes
 docs/phases.md                    roadmap, status and exit criteria per phase
 docs/architect.md                 system architecture and frontend design system
 docs/memory.md                    verified facts, decisions log, conventions (read first)

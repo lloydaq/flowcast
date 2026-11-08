@@ -9,8 +9,8 @@ Related: [architect.md](architect.md) · [memory.md](memory.md)
 | 0 | Discovery and planning | ✅ done | – |
 | 1 | Dataset acquisition and foundation | ✅ done | `736fa89` |
 | 2 | Exploratory data analysis | ✅ done | `8665a3b` |
-| 3 | Feature engineering | ⏭ next | |
-| 4 | Baselines and evaluation framework | planned | |
+| 3 | Feature engineering | ✅ done | see git log |
+| 4 | Baselines and evaluation framework | ⏭ next | |
 | 5 | LightGBM | planned | |
 | 6 | Graph deep learning (DCRNN) | planned | |
 | 7 | Backend (FastAPI) | planned | |
@@ -49,7 +49,13 @@ Related: [architect.md](architect.md) · [memory.md](memory.md)
 
 ---
 
-## Phase 3 — Feature engineering ⏭
+## Phase 3 — Feature engineering ✅
+
+**Delivered:** `src/flowcast/features/build.py`, `src/flowcast/congestion.py` (shared free-flow definition), `scripts/build_features.py`, 14 tests, [features.md](features.md).
+
+**Verified results:** 48 features (39 per horizon). The leakage test passes and was shown to catch an injected centred-window leak. Lags and targets match the official HF windows on 300 random validation rows. Rows: train 4,677,385 / validation 668,200 / test 1,276,937. Peak RAM 2.27 GB; build time 34 s. The adjacency direction was verified: `A[i,j]` = kernel of the distance from i to j.
+
+### Original plan
 
 **Goal:** a reusable, leakage-proof generator of (sensor, as-of time) feature rows with targets at h = 3, 6, 9, 12 steps.
 
@@ -75,7 +81,7 @@ Related: [architect.md](architect.md) · [memory.md](memory.md)
 4. Feature tables written to Parquet as float32, with peak RAM measured and under 8 GB.
 5. `docs/features.md`: the feature list, the reason for each feature, and table sizes.
 
-## Phase 4 — Baselines and evaluation framework
+## Phase 4 — Baselines and evaluation framework ⏭
 
 - Masked MAE / RMSE / MAPE per horizon. MAPE excludes targets under 5 mph, and the threshold is stated.
 - Slices: peak, off-peak, congested, per sensor, by hour.

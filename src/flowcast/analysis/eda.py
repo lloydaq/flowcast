@@ -10,16 +10,10 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+from flowcast.congestion import CONGESTION_RATIO, FREE_FLOW_PERCENTILE, free_flow_speed  # noqa: F401
+
 STEPS_PER_HOUR = 12
 STEPS_PER_DAY = 288
-
-FREE_FLOW_PERCENTILE = 85  # traffic-engineering convention for a sensor's free-flow speed
-CONGESTION_RATIO = 0.6  # congested when speed < 60% of free-flow speed (EDA working definition)
-
-
-def free_flow_speed(speed: pd.DataFrame) -> pd.Series:
-    """Per-sensor free-flow speed: the 85th percentile of observed speed."""
-    return speed.quantile(FREE_FLOW_PERCENTILE / 100)
 
 
 def congestion_mask(speed: pd.DataFrame, free_flow: pd.Series | None = None) -> pd.DataFrame:
