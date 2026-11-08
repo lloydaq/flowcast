@@ -44,3 +44,7 @@ See [docs/dataset.md](docs/dataset.md). Key facts: speeds are in **mph**, `0` me
 ## Citation
 
 The dataset comes from Li, Yu, Shahabi & Liu, *Diffusion Convolutional Recurrent Neural Network: Data-Driven Traffic Forecasting*, ICLR 2018. The Hugging Face packaging is by [witgaw](https://huggingface.co/datasets/witgaw/METR-LA).
+
+## License
+
+Code is released under the [MIT License](LICENSE). The METR-LA data is not redistributed here; it is downloaded from its source under its own (MIT) license.

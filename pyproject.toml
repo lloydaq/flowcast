@@ -5,6 +5,8 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "flowcast"
 version = "0.1.0"
+license = "MIT"
+authors = [{ name = "Lloyd D'Souza" }]
 description = "Intelligent traffic forecasting on METR-LA. Predict traffic before it happens."
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
