@@ -41,6 +41,9 @@ src/flowcast/analysis/eda.py      EDA statistics (congestion, profiles, autocorr
 scripts/run_eda.py                EDA figures and summary (training period only)
 docs/dataset.md                   verified dataset documentation
 docs/eda.md                       EDA report
+docs/phases.md                    roadmap, status and exit criteria per phase
+docs/architect.md                 system architecture and frontend design system
+docs/memory.md                    verified facts, decisions log, conventions (read first)
 ```
 
 ## Data

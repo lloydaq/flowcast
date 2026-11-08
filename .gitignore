@@ -21,3 +21,6 @@ models/checkpoints/
 .idea/
 Thumbs.db
 .DS_Store
+
+# Local design-tool working files
+.taste-skill/
