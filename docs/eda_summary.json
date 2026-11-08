@@ -1,0 +1,298 @@
+{
+  "period": {
+    "split": "train",
+    "start": "2012-03-01 00:00:00",
+    "end": "2012-05-23 06:40:00"
+  },
+  "distribution": {
+    "percentiles_mph": {
+      "1": 13.5,
+      "5": 26.25,
+      "10": 38.5,
+      "25": 57.22,
+      "50": 63.22,
+      "75": 66.5,
+      "90": 68.25,
+      "99": 69.75
+    },
+    "share_below_mph": {
+      "20": 2.75,
+      "30": 6.46,
+      "40": 10.49,
+      "50": 15.3
+    }
+  },
+  "congestion": {
+    "definition": "speed < 0.6 x per-sensor p85 speed",
+    "free_flow_mph": {
+      "count": 207.0,
+      "mean": 65.57,
+      "std": 4.51,
+      "min": 36.22,
+      "25%": 64.59,
+      "50%": 66.38,
+      "75%": 68.31,
+      "max": 70.0
+    },
+    "overall_rate_pct": 9.15,
+    "sensor_rate_pct": {
+      "count": 207.0,
+      "mean": 9.1,
+      "std": 9.62,
+      "min": 0.0,
+      "25%": 1.82,
+      "50%": 7.0,
+      "75%": 12.46,
+      "max": 49.54
+    },
+    "sensors_never_congested": 0
+  },
+  "daily_profile": {
+    "weekday_am_trough": {
+      "time": "08:35",
+      "mph": 49.05
+    },
+    "weekday_pm_trough": {
+      "time": "17:25",
+      "mph": 45.73
+    },
+    "weekday_max_mph": 63.6,
+    "weekend_min_mph": 56.7,
+    "weekend_min_time": "13:35"
+  },
+  "weekly_congestion_peak": {
+    "day": "Thu",
+    "hour": 17,
+    "rate_pct": 43.44
+  },
+  "daily_network_speed": {
+    "min_day": "2012-03-09",
+    "min_mph": 55.34,
+    "max_day": "2012-03-18",
+    "max_mph": 64.24,
+    "weekday_mean": 57.33,
+    "weekend_mean": 61.65
+  },
+  "missing_by_hour_pct": {
+    "0": 9.09,
+    "1": 9.07,
+    "2": 8.84,
+    "3": 7.71,
+    "4": 5.93,
+    "5": 6.01,
+    "6": 6.17,
+    "7": 6.43,
+    "8": 8.11,
+    "9": 8.38,
+    "10": 7.89,
+    "11": 7.18,
+    "12": 7.41,
+    "13": 9.14,
+    "14": 8.62,
+    "15": 7.71,
+    "16": 5.97,
+    "17": 6.93,
+    "18": 7.86,
+    "19": 5.94,
+    "20": 4.87,
+    "21": 5.49,
+    "22": 5.38,
+    "23": 5.06
+  },
+  "worst_missing_days": {
+    "2012-04-08": 81.6,
+    "2012-03-27": 67.9,
+    "2012-03-26": 65.4,
+    "2012-04-25": 54.7,
+    "2012-04-09": 43.2
+  },
+  "most_congested_sensors": [
+    {
+      "node_id": 12,
+      "sensor_id": "716339",
+      "rate": 49.54
+    },
+    {
+      "node_id": 193,
+      "sensor_id": "717453",
+      "rate": 48.86
+    },
+    {
+      "node_id": 144,
+      "sensor_id": "764853",
+      "rate": 42.51
+    },
+    {
+      "node_id": 187,
+      "sensor_id": "717458",
+      "rate": 42.42
+    },
+    {
+      "node_id": 91,
+      "sensor_id": "773023",
+      "rate": 41.4
+    }
+  ],
+  "network_autocorrelation": {
+    "5 min": 0.995,
+    "1 h": 0.826,
+    "6 h": 0.009,
+    "12 h": -0.273,
+    "1 day": 0.673,
+    "1 week": 0.879
+  },
+  "horizon_autocorrelation": {
+    "15 min": {
+      "count": 207.0,
+      "mean": 0.76,
+      "std": 0.157,
+      "min": 0.212,
+      "25%": 0.684,
+      "50%": 0.82,
+      "75%": 0.873,
+      "max": 0.947
+    },
+    "30 min": {
+      "count": 207.0,
+      "mean": 0.672,
+      "std": 0.157,
+      "min": 0.206,
+      "25%": 0.583,
+      "50%": 0.72,
+      "75%": 0.79,
+      "max": 0.9
+    },
+    "45 min": {
+      "count": 207.0,
+      "mean": 0.595,
+      "std": 0.156,
+      "min": 0.154,
+      "25%": 0.488,
+      "50%": 0.637,
+      "75%": 0.709,
+      "max": 0.848
+    },
+    "60 min": {
+      "count": 207.0,
+      "mean": 0.528,
+      "std": 0.151,
+      "min": 0.133,
+      "25%": 0.41,
+      "50%": 0.568,
+      "75%": 0.632,
+      "max": 0.793
+    }
+  },
+  "correlation_by_road_distance_km": {
+    "(0, 1]": {
+      "mean_corr": 0.764,
+      "pairs": 142
+    },
+    "(1, 2]": {
+      "mean_corr": 0.556,
+      "pairs": 271
+    },
+    "(2, 3]": {
+      "mean_corr": 0.387,
+      "pairs": 475
+    },
+    "(3, 5]": {
+      "mean_corr": 0.333,
+      "pairs": 1566
+    },
+    "(5, 8]": {
+      "mean_corr": 0.273,
+      "pairs": 4340
+    },
+    "(8, 12]": {
+      "mean_corr": 0.233,
+      "pairs": 4752
+    }
+  },
+  "edge_lead_lag": {
+    "edges": 1515,
+    "best_lag_share_pct": {
+      "0": 57.89,
+      "1": 13.07,
+      "2": 6.6,
+      "3": 7.0,
+      "4": 5.68,
+      "5": 4.49,
+      "6": 5.28
+    },
+    "mean_corr_of_differences_by_lag": {
+      "0": 0.069,
+      "1": 0.0024,
+      "2": -0.0004,
+      "3": 0.0058,
+      "4": 0.005,
+      "5": 0.0032,
+      "6": 0.0047
+    }
+  },
+  "congestion_episodes": {
+    "count": 52801,
+    "duration_min": {
+      "count": 52801.0,
+      "mean": 40.0,
+      "std": 70.9,
+      "min": 5.0,
+      "25%": 5.0,
+      "50%": 15.0,
+      "75%": 35.0,
+      "max": 885.0
+    },
+    "share_single_step_pct": 34.75,
+    "onset_hour_share_pct_ge_15min": {
+      "0": 0.21,
+      "1": 0.2,
+      "2": 0.23,
+      "3": 0.23,
+      "4": 0.1,
+      "5": 0.32,
+      "6": 5.25,
+      "7": 9.57,
+      "8": 6.44,
+      "9": 4.6,
+      "10": 3.81,
+      "11": 4.47,
+      "12": 4.5,
+      "13": 4.82,
+      "14": 7.47,
+      "15": 11.11,
+      "16": 13.44,
+      "17": 11.64,
+      "18": 6.8,
+      "19": 2.44,
+      "20": 0.73,
+      "21": 0.49,
+      "22": 0.67,
+      "23": 0.47
+    }
+  },
+  "low_speed_readings": {
+    "low_readings": 2390,
+    "isolated": 7
+  },
+  "dst_check": {
+    "weekday_am_trough_before_2012_03_11": 505,
+    "weekday_am_trough_after_2012_03_11": 515,
+    "unit": "minutes after midnight"
+  },
+  "train_vs_validation": {
+    "mean_speed": [
+      58.58,
+      58.89
+    ],
+    "congestion_rate_pct": [
+      9.15,
+      9.39
+    ],
+    "missing_pct": [
+      7.13,
+      6.96
+    ],
+    "weekday_profile_corr": 0.991,
+    "note": "validation contains Memorial Day (2012-05-28, a Monday holiday)"
+  }
+}
