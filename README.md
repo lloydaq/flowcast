@@ -9,8 +9,9 @@
 | 1 | Dataset acquisition, reconstruction, validation | ✅ done |
 | 2 | Exploratory data analysis ([report](docs/eda.md)) | ✅ done |
 | 3 | Feature engineering ([features](docs/features.md)) | ✅ done |
-| 4 | Baselines and evaluation | next |
-| 5–6 | LightGBM, graph deep learning | planned |
+| 4 | Baselines and evaluation ([results](docs/baseline_results.md), [experiments](docs/experiments.md)) | ✅ done |
+| 5 | LightGBM | next |
+| 6 | Graph deep learning | planned |
 | 7–10 | FastAPI backend, React dashboard, integration, release | planned |
 
 ## Setup (Windows / PowerShell)
@@ -25,6 +26,7 @@ pip install -r requirements.txt
 python scripts/prepare_metr_la.py   # downloads ~230 MB once, writes data/processed/
 python scripts/run_eda.py           # EDA figures -> docs/figures/eda, numbers -> docs/eda_summary.json
 python scripts/build_features.py    # point-in-time feature tables -> data/processed/features/
+python scripts/run_baselines.py     # baseline scores -> models/metrics/baselines.json, docs/baseline_results.md
 pytest                              # unit tests + data integration tests
 ruff check .
 ```
@@ -41,11 +43,14 @@ tests/                            unit tests (synthetic) and data integration te
 src/flowcast/data/processed.py    load processed speed matrix / sensors per split
 src/flowcast/congestion.py        shared free-flow / congestion definitions
 src/flowcast/features/build.py    point-in-time features and targets (leakage-tested)
+src/flowcast/evaluation/metrics.py masked MAE / RMSE / MAPE and slices (peak, congested, hour, sensor)
+src/flowcast/models/baselines.py  persistence, historical average, seasonal naive, AR on residuals
 src/flowcast/analysis/eda.py      EDA statistics (congestion, profiles, autocorrelation, spatial)
 scripts/run_eda.py                EDA figures and summary (training period only)
 docs/dataset.md                   verified dataset documentation
 docs/eda.md                       EDA report
 docs/features.md                  feature definitions, leakage guarantees, table sizes
+docs/experiments.md               experiment log: baselines and the floor to beat
 docs/phases.md                    roadmap, status and exit criteria per phase
 docs/architect.md                 system architecture and frontend design system
 docs/memory.md                    verified facts, decisions log, conventions (read first)

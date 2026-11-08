@@ -9,9 +9,9 @@ Related: [architect.md](architect.md) · [memory.md](memory.md)
 | 0 | Discovery and planning | ✅ done | – |
 | 1 | Dataset acquisition and foundation | ✅ done | `736fa89` |
 | 2 | Exploratory data analysis | ✅ done | `8665a3b` |
-| 3 | Feature engineering | ✅ done | see git log |
-| 4 | Baselines and evaluation framework | ⏭ next | |
-| 5 | LightGBM | planned | |
+| 3 | Feature engineering | ✅ done | `ea342c8` |
+| 4 | Baselines and evaluation framework | ✅ done | see git log |
+| 5 | LightGBM | ⏭ next | |
 | 6 | Graph deep learning (DCRNN) | planned | |
 | 7 | Backend (FastAPI) | planned | |
 | 8 | Frontend (React) | planned | |
@@ -81,7 +81,14 @@ Related: [architect.md](architect.md) · [memory.md](memory.md)
 4. Feature tables written to Parquet as float32, with peak RAM measured and under 8 GB.
 5. `docs/features.md`: the feature list, the reason for each feature, and table sizes.
 
-## Phase 4 — Baselines and evaluation framework ⏭
+## Phase 4 — Baselines and evaluation framework ✅
+
+**Delivered:** `src/flowcast/evaluation/metrics.py`, `src/flowcast/models/baselines.py`, `scripts/run_baselines.py`, 12 tests, `models/metrics/baselines.json`, [baseline_results.md](baseline_results.md) (generated), [experiments.md](experiments.md).
+
+**Verified results:** the AR-on-residuals baseline is the best at every horizon on MAE and RMSE (validation MAE 3.15 → 3.98 mph from 15 to 60 min). Persistence keeps the best 15-min MAPE. Every baseline passes a future-perturbation leakage test, which was shown to catch two injected lookahead bugs. Runtime 23 s.
+
+### Original plan
+
 
 - Masked MAE / RMSE / MAPE per horizon. MAPE excludes targets under 5 mph, and the threshold is stated.
 - Slices: peak, off-peak, congested, per sensor, by hour.

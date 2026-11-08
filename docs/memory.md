@@ -2,7 +2,7 @@
 
 Persistent context for anyone continuing this project: the developer, another engineer, Claude Code or ChatGPT. Read this first. It records **verified facts, decisions and conventions** that are not obvious from the code. Update it at the end of every phase.
 
-Last updated: 2026-11-08 (Phase 3 complete). Current state: Phase 4 (baselines + evaluation) is next. See [phases.md](phases.md).
+Last updated: 2026-11-08 (Phase 4 complete). Current state: Phase 5 (LightGBM) is next. See [phases.md](phases.md).
 
 ## Hard constraints
 
@@ -46,6 +46,10 @@ Last updated: 2026-11-08 (Phase 3 complete). Current state: Phase 4 (baselines +
 | 2026-11-08 | Features: 48 columns from the canonical matrix; NaN kept (no imputation), ffill ≤ 3 steps; one row per (t, sensor); rows with targets in another split dropped | LightGBM handles NaN natively; prevents leakage across splits |
 | 2026-11-08 | Seasonal features are horizon-specific; each horizon's model uses 39 columns via `feature_columns(cols, h)` | Seasonal lags point at the target's clock time |
 | 2026-11-08 | Free-flow and congestion definitions moved to `flowcast/congestion.py` | One definition shared by EDA, features, evaluation and the API |
+| 2026-11-08 | Metrics are masked (missing targets excluded); a NaN prediction on a scored row raises; MAPE excludes targets < 5 mph | No model can look better by skipping hard rows or by dividing by near-zero speeds |
+| 2026-11-08 | Slices use the **target** time; peak = weekdays 07:00–09:59 and 15:00–18:59; congested = target < 0.6 × free-flow | Peak hours are where the training weekday mean speed dips below ~53 mph |
+| 2026-11-08 | Baselines fall back to the historical average when their own input is missing, and the fallback share is reported | Every model scores the same rows |
+| 2026-11-08 | Floor to beat = the best baseline per horizon (AR on residuals for MAE/RMSE). Test scores were computed once in Phase 4 | Baselines have nothing to tune, so a test score is a fair floor |
 | *open* | PostgreSQL vs Parquet-only backend | Decide before Phase 7 ([architect.md](architect.md) §6) |
 
 ## Conventions
@@ -63,7 +67,8 @@ Last updated: 2026-11-08 (Phase 3 complete). Current state: Phase 4 (baselines +
 python scripts/prepare_metr_la.py   # rebuild data/processed/ (~33 s with a warm HF cache)
 python scripts/run_eda.py           # rebuild EDA figures and docs/eda_summary.json
 python scripts/build_features.py    # data/processed/features/{split}.parquet (~34 s, 2.3 GB peak)
-pytest                              # 42 tests at end of Phase 3
+python scripts/run_baselines.py     # models/metrics/baselines.json + docs/baseline_results.md (~23 s)
+pytest                              # 54 tests at end of Phase 4
 ruff check . ; ruff format --check .
 ```
 
@@ -75,4 +80,5 @@ ruff check . ; ruff format --check .
 - The test period has many more missing readings, so always use masked metrics.
 - The official windows only reach back 11 steps (`x_t-11`); `speed_lag12` has no official counterpart.
 - Feature tables are float32: compare with a tolerance (~1e-4 mph), not `==`.
+- The seasonal-naive baseline falls back on 14% of test rows (week-ago readings lost to outages), against 3% in validation.
 - Validation contains Memorial Day (Mon 2012-05-28). Training has no US federal holidays.
