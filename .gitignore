@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Data and model artefacts (reproducible via scripts/)
+data/raw/*
+data/interim/*
+data/processed/*
+!data/**/.gitkeep
+models/checkpoints/
+
+# Environment / secrets
+.env
+
+# Editors / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
