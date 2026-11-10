@@ -1,6 +1,4 @@
-import "@fontsource/ibm-plex-sans/400.css";
-import "@fontsource/ibm-plex-sans/500.css";
-import "@fontsource/ibm-plex-sans/600.css";
+import "@fontsource-variable/inter";
 import "@fontsource/ibm-plex-mono/400.css";
 import "./styles/tokens.css";
 import "./styles/app.css";
@@ -11,15 +9,13 @@ import { createBrowserRouter, RouterProvider } from "react-router";
 import { Shell } from "./components/Shell";
 import { queryClient } from "./lib/queries";
 import { ReplayProvider } from "./lib/replay";
-import { applyTheme, initialTheme } from "./lib/theme";
-import { ModelsScreen } from "./screens/Models";
+import { initTheme } from "./lib/theme";
 import { NetworkScreen } from "./screens/Network";
 import { NotFound } from "./screens/NotFound";
-import { PatternsScreen } from "./screens/Patterns";
-import { SensorScreen } from "./screens/Sensor";
 
-applyTheme(initialTheme());
+initTheme();
 
+// The Network screen ships in the first bundle; the other screens load when first opened.
 const router = createBrowserRouter([
   {
     element: (
@@ -29,9 +25,11 @@ const router = createBrowserRouter([
     ),
     children: [
       { path: "/", element: <NetworkScreen /> },
-      { path: "/sensor/:id", element: <SensorScreen /> },
-      { path: "/models", element: <ModelsScreen /> },
-      { path: "/patterns", element: <PatternsScreen /> },
+      { path: "/sensors", lazy: () => import("./screens/Sensors").then((m) => ({ Component: m.SensorsScreen })) },
+      { path: "/sensor/:id", lazy: () => import("./screens/Sensor").then((m) => ({ Component: m.SensorScreen })) },
+      { path: "/models", lazy: () => import("./screens/Models").then((m) => ({ Component: m.ModelsScreen })) },
+      { path: "/patterns", lazy: () => import("./screens/Patterns").then((m) => ({ Component: m.PatternsScreen })) },
+      { path: "/settings", lazy: () => import("./screens/Settings").then((m) => ({ Component: m.SettingsScreen })) },
       { path: "*", element: <NotFound /> },
     ],
   },

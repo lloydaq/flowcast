@@ -4,7 +4,7 @@
 import "leaflet/dist/leaflet.css";
 import type { LatLngBoundsExpression, Map as LeafletMap } from "leaflet";
 import { useEffect, useMemo, useState } from "react";
-import { CircleMarker, MapContainer, TileLayer, Tooltip } from "react-leaflet";
+import { CircleMarker, MapContainer, Popup, TileLayer, Tooltip } from "react-leaflet";
 import { resolveColor } from "../../lib/severity";
 import { prefersReducedMotion } from "../../lib/theme";
 import { useTheme } from "../useTheme";
@@ -16,6 +16,8 @@ export interface MapPoint {
   color: string; // var(--token)
   hollow?: boolean; // no reading
   tip: string;
+  /** Label/value rows for the click popup; without them a click selects the sensor directly. */
+  details?: readonly (readonly [string, string])[];
 }
 
 const TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
@@ -75,7 +77,7 @@ export function SensorMap({
       keyboard={false}
     >
       <TileLayer url={TILES} attribution={ATTRIBUTION} maxZoom={18} />
-      {points.map((p) => (
+      {points.map((p, i) => (
         <CircleMarker
           key={p.id}
           center={[p.lat, p.lon]}
@@ -86,11 +88,30 @@ export function SensorMap({
             fillColor: p.hollow ? c("var(--surface)") : c(p.color),
             fillOpacity: 1,
           }}
-          eventHandlers={onSelect ? { click: () => onSelect(p.id) } : undefined}
+          className={`fc-marker fc-d${i % 6}`}
+          eventHandlers={onSelect && !p.details ? { click: () => onSelect(p.id) } : undefined}
         >
           <Tooltip className="fc-tip" direction="top" offset={[0, -radius]}>
             {p.tip}
           </Tooltip>
+          {p.details && (
+            <Popup className="fc-popup" closeButton={false} offset={[0, -radius]}>
+              <div className="popup-title mono">{p.id}</div>
+              <dl>
+                {p.details.map(([k, v]) => (
+                  <div key={k}>
+                    <dt>{k}</dt>
+                    <dd>{v}</dd>
+                  </div>
+                ))}
+              </dl>
+              {onSelect && (
+                <button type="button" className="btn btn-primary" onClick={() => onSelect(p.id)}>
+                  Open forecast
+                </button>
+              )}
+            </Popup>
+          )}
         </CircleMarker>
       ))}
       {sel && (
@@ -99,6 +120,7 @@ export function SensorMap({
           center={[sel.lat, sel.lon]}
           radius={radius + 4}
           interactive={false}
+          className="fc-selected"
           pathOptions={{ color: c("var(--text)"), weight: 2, fill: false }}
         />
       )}

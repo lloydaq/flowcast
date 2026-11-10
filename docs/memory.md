@@ -62,6 +62,9 @@ Last updated: 2026-11-08 (Phase 5 complete). Current state: Phase 6 (graph deep 
 | 2026-11-10 | API in `src/flowcast/api/`; default model DCRNN; in-range outage times return null, not 422 | One package, shared code; lowest MAE; a replay slider never hits an error |
 | 2026-11-10 | Frontend: plain CSS on the §10 tokens, own SVG charts, greyscale OSM tiles; light theme by default | Every shadcn default would be replaced; §10.7 rules fight Recharts; CARTO now needs a key; the dealt style is light |
 | 2026-11-10 | Default replay time Tue 12 Jun 2012 16:30 | The evening build-up: 63 sensors congested now, 82 forecast within 30 min |
+| 2026-11-10 | Redesign: navy + ivory palette, Inter, dark / light / system themes; `tokens.css` is the source of truth (architect.md §10 colours superseded) | Developer's new visual direction |
+| 2026-11-10 | Sidebar lists only screens with real data (Network, Sensors, Models, Patterns, Settings) | No Dashboard / Analytics / Experiments / Reports pages exist; nothing is faked |
+| 2026-11-10 | README images are theme-aware `<picture>` pairs; screenshots come from `frontend/scripts/screenshots.mjs` | Real captures in both themes; the script also fails on console errors or overflow |
 
 ## Conventions
 

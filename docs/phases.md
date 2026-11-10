@@ -129,7 +129,7 @@ Result: nine read-only endpoints serving precomputed replay forecasts from memor
 
 Result: four screens (Network, Sensor, Models, Patterns) on the framed sheet, with the replay clock in the URL; taste-skill inspector 0 FAIL at 1440 / 768 / 390 in light and dark; Lighthouse accessibility 100 on every screen; reduced motion verified. The corridor time-space diagram (stretch) was not built. Changes to the §9 plan: plain CSS instead of Tailwind/shadcn, own SVG charts, greyscale OSM tiles (CARTO now needs a key). See [architect.md](architect.md) §9.
 
-![Network screen](figures/frontend/network.jpg)
+![Network screen](assets/screens/network-light.png)
 
 
 - Built to the design system in [architect.md](architect.md) §10: framed sheet, pill controls, no neon, motion spec, accessibility rules.

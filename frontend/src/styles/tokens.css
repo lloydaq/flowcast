@@ -1,58 +1,60 @@
-/* FlowCast design tokens: docs/architect.md §10. Every colour, radius, size and timing comes from here. */
+/* FlowCast design tokens. Every colour, radius, size and timing in the app comes from here.
+   One identity in two themes: navy ink, warm ivory, one steel-blue data hue, and a single
+   orange-to-red ramp that is used only for congestion. No component hardcodes a colour. */
 
 :root {
   color-scheme: light;
-  /* surfaces */
-  --ground: #f9fbfc;
+  /* surfaces: warm off-white ground, white cards */
+  --ground: #f6f4ef;
   --surface: #ffffff;
-  --raised: #f4f6f8;
-  --active: #ebedee;
+  --raised: #f2f0ea;
+  --active: #e8e5dc;
   /* lines (three steps) */
-  --border: #e8eaec;
-  --rule: #f0f1f2;
-  --control: #cdced1;
-  /* text (three tiers, all >= 4.5:1 on white) */
-  --text: #131416;
-  --muted: #5d5f60;
-  --faint: #6b6b6b;
+  --border: #e3e0d7;
+  --rule: #efede7;
+  --control: #c8c4b8;
+  /* text (three tiers, all >= 4.5:1 on their surface) */
+  --text: #0f1b33;
+  --muted: #4f5b73;
+  --faint: #5d6981;
   /* actions */
-  --primary: #1d1f20;
+  --primary: #14213d;
   --on-primary: #ffffff;
-  --focus: #2a78d6;
+  --focus: #2f5f9e;
   /* data */
-  --forecast: #2a78d6;
-  --comparison: #a86f0c;
-  --actual: #131416;
-  --actual-after: #80868b;
-  --cong-1: #e2836b;
-  --cong-2: #c94a35;
-  --cong-3: #a3231b;
-  --cong-4: #6e1510;
-  --free-flow: #8a9097;
+  --forecast: #2f5f9e; /* the accent: the forecast series and the one selected data state */
+  --comparison: #94650f; /* a second model in comparisons only */
+  --actual: #0f1b33;
+  --actual-after: #7b869b;
+  --cong-1: #dd9347; /* slowing */
+  --cong-2: #d9692b; /* congested */
+  --cong-3: #c93a26; /* heavy */
+  --cong-4: #8f1d17; /* stop-and-go */
+  --free-flow: #8a93a3;
   --marker-halo: #ffffff;
   /* status */
   --positive: #1e7b4f;
-  --negative: #c4242a;
-  --pill-positive-bg: #dcfae5;
-  --pill-positive-ink: #04250e;
-  --pill-negative-bg: #ffedea;
-  --pill-negative-ink: #831c1e;
-  --pill-warning-bg: #fffbeb;
-  --pill-warning-ink: #92400e;
-  --pill-warning-edge: #fde68a;
-  --grid: #e5e5e5;
-  --float-shadow: 0 1px 2px rgb(16 24 40 / 0.06), 0 8px 24px rgb(16 24 40 / 0.08);
+  --negative: #b3261e;
+  --pill-positive-bg: #dcf5e6;
+  --pill-positive-ink: #0c3b23;
+  --pill-negative-bg: #fdebe7;
+  --pill-negative-ink: #7d1b15;
+  --pill-warning-bg: #fdf6e3;
+  --pill-warning-ink: #7a4a0a;
+  --pill-warning-edge: #f0dca4;
+  --grid: #e4e1d9;
+  --float-shadow: 0 1px 2px rgb(15 27 51 / 0.06), 0 8px 24px rgb(15 27 51 / 0.1);
 
-  /* corners (§10.5): containers step down concentrically, every control is a true pill */
+  /* corners: containers step down concentrically; every control is a true pill */
   --r-sheet: 16px;
   --r-card: 12px;
   --r-inner: 8px;
   --r-tip: 6px;
   --r-pill: 9999px;
 
-  /* type (§10.4) */
-  --font: "IBM Plex Sans", system-ui, sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  /* type */
+  --font: "Inter Variable", Inter, system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace; /* sensor IDs only */
   --fs-title: 22px;
   --fs-section: 16px;
   --fs-kpi: 28px;
@@ -61,61 +63,59 @@
 
   /* space */
   --sidebar: 228px;
-  --topbar: 48px;
+  --topbar: 52px;
   --inset: 8px;
   --gap: 24px;
   --pad: 24px;
   --control-h: 32px;
 
-  /* motion (§10.9) */
+  /* motion */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
-  --ease-exit: cubic-bezier(0.55, 0.055, 0.675, 0.19);
   --t-press: 140ms;
   --t-hover: 180ms;
   --t-ui: 240ms;
   --t-panel: 280ms;
   --t-fill: 320ms;
+  --t-enter: 420ms;
   --t-reveal: 500ms;
 }
 
-/* True-neutral dark: no navy, no slate, no neon. The congestion ramp is re-validated for #111:
-   2.6 / 3.8 / 5.9 / 9.6 : 1 (2.1:1 at worst on the dark basemap); on dark, worse is brighter.
-   The theme follows the system unless the viewer picks one (src/lib/theme.ts sets data-theme). */
+/* Dark: deep midnight navy, slightly elevated navy cards, soft white text, ivory primary. */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --ground: #000000;
-  --surface: #111111;
-  --raised: #1a1a1a;
-  --active: #222222;
-  --border: #2e2e2e;
-  --rule: #1c1c1c;
-  --control: #444444;
-  --text: #ffffff;
-  --muted: #b4b4b4;
-  --faint: #949494;
-  --primary: #ffffff;
-  --on-primary: #000000;
-  --focus: #3987e5;
-  --forecast: #3987e5;
-  --comparison: #c98500;
-  --actual: #ffffff;
-  --actual-after: #6f747a;
-  --cong-1: #8f3d2f;
-  --cong-2: #bd4a33;
-  --cong-3: #e8684b;
-  --cong-4: #ffa08a;
-  --free-flow: #63686d;
-  --marker-halo: #111111;
-  --positive: #3fc07a;
-  --negative: #e5566f;
-  --pill-positive-bg: #172a1d;
-  --pill-positive-ink: #3fc07a;
-  --pill-negative-bg: #2c1a20;
-  --pill-negative-ink: #e5566f;
-  --pill-warning-bg: #2a2110;
-  --pill-warning-ink: #f2b84b;
-  --pill-warning-edge: #4a3a14;
-  --grid: #2b2b2b;
-  --float-shadow: 0 8px 24px rgb(0 0 0 / 0.5);
+  --ground: #0a111f;
+  --surface: #111a2c;
+  --raised: #182338;
+  --active: #1f2c45;
+  --border: #23314a;
+  --rule: #1a2639;
+  --control: #3b4b67;
+  --text: #e8edf5;
+  --muted: #a6b2c6;
+  --faint: #8a98b0;
+  --primary: #ece7d9;
+  --on-primary: #0a111f;
+  --focus: #86abdb;
+  --forecast: #76a3da;
+  --comparison: #d2a756;
+  --actual: #e8edf5;
+  --actual-after: #7b8aa4;
+  --cong-1: #e0a458;
+  --cong-2: #e27d3e;
+  --cong-3: #dd4f35;
+  --cong-4: #b42b20;
+  --free-flow: #5f6d86;
+  --marker-halo: #0a111f;
+  --positive: #5fc08d;
+  --negative: #ec6a5c;
+  --pill-positive-bg: #14301f;
+  --pill-positive-ink: #7fd3a5;
+  --pill-negative-bg: #3a1a18;
+  --pill-negative-ink: #f09488;
+  --pill-warning-bg: #2c2412;
+  --pill-warning-ink: #e6bd6a;
+  --pill-warning-edge: #4b3c17;
+  --grid: #22304a;
+  --float-shadow: 0 8px 24px rgb(0 0 0 / 0.45);
 }

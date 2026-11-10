@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 400" width="1280" height="400" role="img" aria-labelledby="t d" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <title id="t">FlowCast — Predict Traffic Before It Happens</title>
+  <desc id="d">Intelligent traffic forecasting and analytics platform. A speed chart shows observed speed up to now, the dashed forecast for the next hour, and what actually happened.</desc>
+  <rect width="1280" height="400" rx="20" fill="#f6f4ef"/>
+  <rect x="0.5" y="0.5" width="1279" height="399" rx="19.5" fill="none" stroke="#e3e0d7"/>
+
+  <g transform="translate(72 76) scale(1.625)">
+    <rect x="0.5" y="0.5" width="31" height="31" rx="8" fill="#14213d" stroke="#e3e0d7"/>
+    <path d="M6 19h6l4-7 3 5" fill="none" stroke="#ece7d9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M19 17l7-6" fill="none" stroke="#76a3da" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="0.1 4.2"/>
+    <circle cx="19" cy="17" r="2.6" fill="#14213d" stroke="#ece7d9" stroke-width="1.8"/>
+  </g>
+  <text x="140" y="111" fill="#0f1b33" font-size="26" font-weight="700" letter-spacing="5">FLOWCAST</text>
+  <text x="72" y="196" fill="#0f1b33" font-size="44" font-weight="650" letter-spacing="-1">Predict traffic</text>
+  <text x="72" y="248" fill="#0f1b33" font-size="44" font-weight="650" letter-spacing="-1">before it happens.</text>
+  <text x="72" y="292" fill="#4f5b73" font-size="18">Intelligent traffic forecasting &amp; analytics platform</text>
+  <text x="72" y="336" fill="#4f5b73" font-size="14">207 sensors · Los Angeles · 15, 30, 45 and 60 minutes ahead</text>
+
+  <rect x="660" y="56" width="548" height="312" rx="14" fill="#ffffff" stroke="#e3e0d7"/>
+  <line x1="700" x2="1160" y1="120" y2="120" stroke="#efede7"/><line x1="700" x2="1160" y1="170" y2="170" stroke="#efede7"/><line x1="700" x2="1160" y1="220" y2="220" stroke="#efede7"/><line x1="700" x2="1160" y1="270" y2="270" stroke="#efede7"/>
+  <line x1="940" x2="940" y1="96" y2="290" stroke="#4f5b73" stroke-dasharray="3 4"/>
+  <text x="932" y="92" fill="#0f1b33" font-size="12" font-weight="600" text-anchor="end">Now</text>
+  <polyline points="940,147 962,160 984,236 1006,262 1028,250 1050,244 1072,256 1094,252 1116,262 1138,258 1160,266" fill="none" stroke="#7b869b" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="700,150 730,146 760,152 790,144 820,148 850,143 880,150 910,145 940,147" fill="none" stroke="#0f1b33" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <clipPath id="reveal"><rect x="936" y="90" height="210" width="240"><animate attributeName="width" from="0" to="240" dur="1.8s" begin="0.4s" fill="freeze" calcMode="spline" keySplines="0.22 1 0.36 1" keyTimes="0;1"/></rect></clipPath>
+  <g clip-path="url(#reveal)">
+    <polyline points="940,147 995,246 1050,258 1105,262 1160,264" fill="none" stroke="#2f5f9e" stroke-width="2.5" stroke-dasharray="7 5" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+  <circle cx="940" cy="147" r="5" fill="#ffffff" stroke="#0f1b33" stroke-width="2"/>
+  <g font-size="12" fill="#4f5b73">
+    <line x1="700" x2="720" y1="308" y2="308" stroke="#0f1b33" stroke-width="2.5"/><text x="728" y="312">Observed</text>
+    <line x1="808" x2="828" y1="308" y2="308" stroke="#2f5f9e" stroke-width="2.5" stroke-dasharray="6 4"/><text x="836" y="312">Forecast</text>
+    <line x1="910" x2="930" y1="308" y2="308" stroke="#7b869b" stroke-width="2"/><text x="938" y="312">What happened</text>
+  </g>
+  <circle cx="700.0" cy="338" r="5" fill="#8a93a3" stroke="#ffffff" stroke-width="1.5"/><circle cx="730.6" cy="338" r="5" fill="#8a93a3" stroke="#ffffff" stroke-width="1.5"/><circle cx="761.2" cy="338" r="5" fill="#8a93a3" stroke="#ffffff" stroke-width="1.5"/><circle cx="791.8" cy="338" r="5" fill="#8a93a3" stroke="#ffffff" stroke-width="1.5"/><circle cx="822.4" cy="338" r="5" fill="#dd9347" stroke="#ffffff" stroke-width="1.5"/><circle cx="853.0" cy="338" r="5" fill="#d9692b" stroke="#ffffff" stroke-width="1.5"/><circle cx="883.6" cy="338" r="5" fill="#c93a26" stroke="#ffffff" stroke-width="1.5"/><circle cx="914.2" cy="338" r="5" fill="#8f1d17" stroke="#ffffff" stroke-width="1.5"/><circle cx="944.8" cy="338" r="5" fill="#8f1d17" stroke="#ffffff" stroke-width="1.5"/><circle cx="975.4" cy="338" r="5" fill="#c93a26" stroke="#ffffff" stroke-width="1.5"/><circle cx="1006.0" cy="338" r="5" fill="#d9692b" stroke="#ffffff" stroke-width="1.5"/><circle cx="1036.6" cy="338" r="5" fill="#dd9347" stroke="#ffffff" stroke-width="1.5"/><circle cx="1067.2" cy="338" r="5" fill="#8a93a3" stroke="#ffffff" stroke-width="1.5"/><circle cx="1097.8" cy="338" r="5" fill="#8a93a3" stroke="#ffffff" stroke-width="1.5"/><circle cx="1128.4" cy="338" r="5" fill="#8a93a3" stroke="#ffffff" stroke-width="1.5"/><circle cx="1159.0" cy="338" r="5" fill="#8a93a3" stroke="#ffffff" stroke-width="1.5"/>
+</svg>
