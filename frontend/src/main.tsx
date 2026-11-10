@@ -33,7 +33,7 @@ const router = createBrowserRouter([
       { path: "*", element: <NotFound /> },
     ],
   },
-]);
+], { basename: import.meta.env.BASE_URL.replace(/\/$/, "") || "/" }); // /flowcast on GitHub Pages
 
 const root = document.getElementById("root");
 if (!root) throw new Error("#root missing from index.html");

@@ -16,7 +16,7 @@ Related: [architect.md](architect.md) · [memory.md](memory.md)
 | 7 | Backend (FastAPI) | ✅ done | see git log |
 | 8 | Frontend (React) | ✅ done | see git log |
 | 9 | Integration and testing | ✅ done | see git log |
-| 10 | Deployment and open-source release | ⏭ next | |
+| 10 | Deployment and open-source release | ✅ done | see git log |
 
 ---
 
@@ -142,7 +142,9 @@ Result: 21 Playwright flows against the real API and production build (desktop a
 
 - End-to-end flows (Playwright), error and empty states against a real backend, a performance check on the 207-marker map, and a security review (CORS, input validation, no filesystem exposure).
 
-## Phase 10 — Deployment and release
+## Phase 10 — Deployment and release ✅
+
+Result: a static demo on GitHub Pages (https://lloydaq.github.io/flowcast/) that rebuilds every API answer from exported files (equal to 80 sampled real answers; the 21 end-to-end flows pass against it under a strict CSP); GitHub Actions CI (lint, Python tests, OpenAPI schema check, frontend type-check, tests and builds); a demo GIF in both themes; a v1.0.0 release. Also: the API's `congested` flag now judges the forecast as returned (2 decimals), so a client can reproduce it exactly.
 
 - Reproducible setup docs, a GitHub Actions CI, and a free hosting option (static precomputed demo vs free-tier backend: decide here).
 - README with real results, screenshots, a short demo GIF, and a v1.0 GitHub release.

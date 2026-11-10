@@ -159,17 +159,21 @@ class ForecastStore:
         steps = HORIZONS[hi]
         fc = self.forecast[model][row, :, hi]
         now, actual = self.values[t], self.values[t + steps]
-        sensors = [
-            {
-                "sensor_id": sid,
-                "speed_now": _num(now[n]),
-                "forecast": _num(fc[n]),
-                "actual": _num(actual[n]),
-                "free_flow": _num(self.free_flow[n]),
-                "congested": None if np.isnan(fc[n]) else bool(fc[n] < CONGESTION_RATIO * self.free_flow[n]),
-            }
-            for sid, n in self.node_of.items()
-        ]
+        sensors = []
+        for sid, n in self.node_of.items():
+            f = _num(fc[n])
+            # judged on the forecast as returned (2 decimals), so a client can reproduce the flag exactly
+            congested = None if f is None else bool(f < CONGESTION_RATIO * self.free_flow[n])
+            sensors.append(
+                {
+                    "sensor_id": sid,
+                    "speed_now": _num(now[n]),
+                    "forecast": f,
+                    "actual": _num(actual[n]),
+                    "free_flow": _num(self.free_flow[n]),
+                    "congested": congested,
+                }
+            )
         return {
             "model": model,
             "as_of": self.replay[row],

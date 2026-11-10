@@ -40,5 +40,6 @@ target-version = "py312"
 select = ["E", "F", "W", "I", "B", "UP", "N", "SIM"]
 
 [tool.pytest.ini_options]
+pythonpath = ["."]  # lets tests import shared fixtures from tests/
 testpaths = ["tests"]
 markers = ["data: requires the downloaded METR-LA dataset (run scripts/prepare_metr_la.py first)"]

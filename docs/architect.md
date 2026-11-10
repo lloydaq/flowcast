@@ -151,7 +151,11 @@ The API lives inside the `flowcast` package (not a separate `backend/` tree) so 
 - Backend: `httpx` / `TestClient` tests for every endpoint, including the 422 cases.
 - Frontend: component tests (Vitest + Testing Library) and one Playwright smoke test for the main flow (pick a sensor, change horizon, see the forecast).
 
-## 8. Deployment *(Phase 10, proposed)*
+## 8. Deployment *(Phase 10, built)*
+
+**Decided 2026-11-10: a fully static demo on GitHub Pages.** `scripts/export_static.py` writes every API answer the dashboard needs: the small ones as the API's own JSON, the forecasts and speeds as per-day uint16 grids (25 MB). `frontend/src/lib/staticApi.ts` rebuilds each answer in the browser when built with `VITE_STATIC=1`, checked against 80 real API answers by `staticApi.test.ts`. `npm run deploy` publishes the build to the `gh-pages` branch, replacing it with one commit each time. The CSP is a meta tag (Pages sends no custom headers), with the hash of the one inline script. The FastAPI backend remains the way to run FlowCast locally.
+
+*Original proposal:*
 
 - Local first: `uvicorn` plus `vite`, no Docker required. A `docker-compose.yml` is offered as an optional convenience.
 - Free public demo options: a static frontend (GitHub Pages / Cloudflare Pages free tier) plus a backend on a free-tier host, **or** a fully static demo where the forecasts for the replay period are precomputed into JSON. The static option costs ₹0 permanently and has no cold starts. To be decided in Phase 10.
