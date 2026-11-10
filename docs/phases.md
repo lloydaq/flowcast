@@ -14,8 +14,8 @@ Related: [architect.md](architect.md) · [memory.md](memory.md)
 | 5 | LightGBM | ✅ done | see git log |
 | 6 | Graph deep learning (DCRNN) | ✅ done | see git log |
 | 7 | Backend (FastAPI) | ✅ done | see git log |
-| 8 | Frontend (React) | ⏭ next | |
-| 9 | Integration and testing | planned | |
+| 8 | Frontend (React) | ✅ done | see git log |
+| 9 | Integration and testing | ⏭ next | |
 | 10 | Deployment and open-source release | planned | |
 
 ---
@@ -125,7 +125,12 @@ Result: nine read-only endpoints serving precomputed replay forecasts from memor
 - **Decided:** Parquet-only, precomputed forecasts ([architect.md](architect.md) §6).
 - **Exit:** every endpoint tested, including validation errors; OpenAPI docs; p95 latency of the network forecast measured.
 
-## Phase 8 — Frontend
+## Phase 8 — Frontend ✅
+
+Result: four screens (Network, Sensor, Models, Patterns) on the framed sheet, with the replay clock in the URL; taste-skill inspector 0 FAIL at 1440 / 768 / 390 in light and dark; Lighthouse accessibility 100 on every screen; reduced motion verified. The corridor time-space diagram (stretch) was not built. Changes to the §9 plan: plain CSS instead of Tailwind/shadcn, own SVG charts, greyscale OSM tiles (CARTO now needs a key). See [architect.md](architect.md) §9.
+
+![Network screen](figures/frontend/network.jpg)
+
 
 - Built to the design system in [architect.md](architect.md) §10: framed sheet, pill controls, no neon, motion spec, accessibility rules.
 - Screens: Network, Sensor, Models, Patterns. Stretch goal: the corridor time-space diagram.

@@ -24,11 +24,11 @@ class Sensor(BaseModel):
     longitude: float
     free_flow: float | None = Field(description="85th-percentile training speed, mph")
     missing_pct: float
+    train_congested_pct: float | None = Field(description="Share of training readings congested, %")
 
 
 class SensorDetail(Sensor):
     train_mean_speed: float | None
-    train_congested_pct: float | None
     weekday_hourly_speed: list[float | None] = Field(description="Training weekday mean speed, hours 0–23")
 
 
@@ -99,6 +99,11 @@ class ModelScores(BaseModel):
     model: str
     validation: dict[int, HorizonScores]
     test: dict[int, HorizonScores]
+
+
+class SensorError(BaseModel):
+    sensor_id: str
+    mae: float
 
 
 class Gap(BaseModel):

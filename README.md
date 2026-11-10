@@ -13,7 +13,8 @@
 | 5 | LightGBM ([model card](docs/model_card_lightgbm.md)) | ✅ done |
 | 6 | Graph deep learning ([DCRNN card](docs/model_card_dcrnn.md), [comparison](docs/model_comparison.md)) | ✅ done |
 | 7 | FastAPI backend (replay-clock forecasts; OpenAPI at `/docs`) | ✅ done |
-| 8–10 | React dashboard, integration, release | planned |
+| 8 | React dashboard: Network, Sensor, Models, Patterns ([screenshot](docs/figures/frontend/network.jpg)) | ✅ done |
+| 9–10 | Integration tests, release | planned |
 
 ## Setup (Windows / PowerShell)
 
@@ -35,11 +36,25 @@ python scripts/train_dcrnn.py       # DCRNN on the GPU + model card (~3.7 h; --r
 python scripts/compare_models.py    # side-by-side table + significance -> docs/model_comparison.md
 uvicorn flowcast.api.app:app        # API on http://127.0.0.1:8000 (interactive docs at /docs)
 python scripts/benchmark_api.py     # API latency over HTTP -> models/metrics/api_latency.json
+python scripts/export_openapi.py    # API schema -> frontend/openapi.json (then: cd frontend; npm run api:types)
 pytest                              # unit tests + data integration tests
 ruff check .
 ```
 
 The first run downloads the dataset from Hugging Face and caches it, which needs about 2.8 GB of disk. Later runs reuse the cache. Integration tests are skipped until `prepare_metr_la.py` has been run.
+
+## Frontend (Node 22+)
+
+```powershell
+uvicorn flowcast.api.app:app        # the API on :8000 (in its own window)
+cd frontend
+npm install
+npm run dev                         # http://localhost:5173, proxies /api to :8000
+npm run build; npm run preview      # the production build on http://localhost:4173
+npm test; npm run typecheck
+```
+
+Every view is a URL: `/sensor/773939?t=2012-06-12T16:30&h=30&m=dcrnn` replays sensor 773939 at 16:30 on 12 June 2012 with DCRNN's 30-minute forecast. `?theme=dark` switches the theme.
 
 ## Layout
 
@@ -70,6 +85,7 @@ docs/model_card_dcrnn.md          DCRNN model card (generated)
 docs/model_comparison.md          all models side by side, with bootstrap significance (generated)
 docs/phases.md                    roadmap, status and exit criteria per phase
 docs/architect.md                 system architecture and frontend design system
+frontend/                         React + TypeScript dashboard (screens, charts, map, replay clock)
 docs/memory.md                    verified facts, decisions log, conventions (read first)
 ```
 

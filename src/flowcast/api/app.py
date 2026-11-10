@@ -162,6 +162,18 @@ def create_app(store: ForecastStore | None = None) -> FastAPI:
             "dcrnn_minus_lightgbm": {split: by_minutes(g) for split, g in gap.items()},
         }
 
+    @app.get(
+        "/api/metrics/sensors", response_model=list[schemas.SensorError], responses=ERRORS, tags=["models"]
+    )
+    def sensor_errors(
+        request: Request,
+        model: Annotated[str, Query(description="An evaluated model's name as listed by /api/metrics")],
+        horizon: Annotated[int, Query(description=f"Minutes ahead: one of {list(HORIZON_MIN)}")],
+        split: Annotated[str, Query(description="validation or test")] = "test",
+    ) -> list[dict]:
+        """Masked MAE per sensor, worst first."""
+        return st(request).sensor_errors(model, split, horizon)
+
     @app.get("/api/analytics/daily-profile", response_model=schemas.DailyProfile, tags=["analytics"])
     def daily_profile(request: Request) -> dict:
         return st(request).daily_profile

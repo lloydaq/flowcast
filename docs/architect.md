@@ -158,29 +158,31 @@ The API lives inside the `flowcast` package (not a separate `backend/` tree) so 
 
 ---
 
-## 9. Frontend architecture *(Phase 8, proposed)*
+## 9. Frontend architecture *(Phase 8, built)*
 
 | Concern | Choice | Why |
 |---|---|---|
 | Build | Vite + React + TypeScript (strict) | Fast, standard, free |
-| Styling | Tailwind CSS with the tokens of §10 as CSS variables; **shadcn/ui as source, restyled** | shadcn copies components into the repo, so they can be restyled. Its defaults (zinc palette, 0.5rem radius, focus ring) are replaced, not kept. |
+| Styling | Plain CSS: the §10 tokens as custom properties (`styles/tokens.css`) and one stylesheet (`styles/app.css`) | *Changed in Phase 8.* The plan was Tailwind + restyled shadcn/ui, but every shadcn default would have been replaced and only five small controls were needed (pill button, segmented, select, tabs, tooltip). Hand-written components on the tokens are less code and add no dependencies. |
 | Server state | TanStack Query | Caching and retries for read-only data |
-| UI state | URL search params (`?sensor=717453&h=30&t=2012-06-12T17:05`) | Every view is shareable and back/forward works |
+| UI state | URL search params (`/sensor/717453?t=2012-06-12T17:05&h=30&m=dcrnn&tab=forecast`) | Every view is shareable and back/forward works |
 | Map | Leaflet + react-leaflet, `CircleMarker` (SVG) | 207 points need no WebGL |
-| Basemap | CARTO **Positron** (light grey), attribution shown; OpenStreetMap standard tiles as fallback | A grey basemap leaves all colour to the data. Free tier for non-commercial use. |
-| Charts | Recharts, restyled to §10.7 (or visx if Recharts fights the rules) | SVG, React-native, fully stylable. Plotly's toolbar look and ~3 MB bundle don't fit. |
-| Icons | lucide-react (shadcn default), outline, 16 px, stroke 1.5 | One set, grey |
+| Basemap | OpenStreetMap standard tiles turned grey by a CSS filter (inverted in dark mode), attribution shown | *Changed in Phase 8.* CARTO Positron now returns "API key required" tiles. Greyscale OSM keeps the basemap hueless, so all colour is data, with no key and no cost (OSM tile-usage policy: light use, attribution). |
+| Charts | Own SVG components (`components/charts/LineChart.tsx`; the weekly grid in CSS) | *Changed in Phase 8.* §10.7 needs breaks with "No data" bands, a dashed forecast that unrolls from the Now line, round ticks from 0 and a hover readout. A ~300-line component does exactly that, where Recharts would be fought at every rule. |
+| Icons | lucide-react, outline, 16 px, stroke 1.5 | One set, grey |
 | Fonts | IBM Plex Sans + IBM Plex Mono, self-hosted via `@fontsource` (OFL) | Free, works offline, has true tabular figures |
 
 ```text
-frontend/src/
-  app/            routes, layout shell (frame + sheet)
-  screens/        network/, sensor/, models/, patterns/
-  components/ui/  restyled shadcn primitives (button, segmented, select, tabs, tooltip, popover)
-  components/     map/, charts/, kpi/, replay/
-  lib/            api client (typed from the backend's OpenAPI), formatters, tokens
-  styles/         tokens.css, fonts.css
+frontend/
+  openapi.json      the API schema (python scripts/export_openapi.py); src/lib/api-types.ts is generated from it
+  src/main.tsx      routes, theme, query client
+  src/screens/      Network, Sensor, Models, Patterns, NotFound
+  src/components/   Shell (frame, sidebar, replay clock, search), Segmented, Block (loading/error/empty), charts/, map/
+  src/lib/          api client, queries, replay state (URL), severity bands, network summary, time, format, theme
+  src/styles/       tokens.css, app.css
 ```
+
+Theme: light by default (the dealt style is a light framed sheet); the dark toggle is remembered per device and `?theme=dark|light` sets it. Verified in Phase 8: taste-skill inspector in app mode at 1440 / 768 / 390, light and dark, 0 FAIL; Lighthouse accessibility 100 on every screen; reduced motion checked in headless Chrome. Stretch goal not built: the corridor time-space diagram.
 
 ---
 
@@ -413,9 +415,9 @@ Rules:
 
 | Item | Status | Plan |
 |---|---|---|
-| PostgreSQL vs Parquet-only backend | open | Decide with the developer before Phase 7 (§6) |
+| PostgreSQL vs Parquet-only backend | decided | Parquet-only, no database (§6) |
 | Calibrated forecast intervals (needed before drawing bands) | open | Quantile LightGBM or conformal intervals in Phase 5; no band unless calibrated on validation |
 | Holidays are absent from training | known limitation | Document; flag Memorial Day in validation |
-| CARTO free-tier limits for a public demo | low risk | Attribution and a non-commercial portfolio use. Fall back to OSM tiles under the OSM tile-usage policy. |
-| Dark-mode congestion ramp | open | Validate in Phase 8 |
+| Basemap tiles for a public demo | low risk | CARTO now needs a key, so the app uses greyscale OSM tiles (§9). A busy public demo should move to a keyed free tier or self-hosted tiles to respect the OSM tile policy. |
+| Dark-mode congestion ramp | done | Validated on #111: 2.6 / 3.8 / 5.9 / 9.6 : 1 (worse is brighter on dark); values in `frontend/src/styles/tokens.css` |
 | DCRNN memory on 6 GB VRAM | medium | Batch 32 or less, 64-unit hidden size, mixed precision; measure before scaling |

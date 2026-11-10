@@ -86,6 +86,7 @@ def test_sensors(client):
     s = get(client, "/api/sensors")
     assert [x["sensor_id"] for x in s] == SENSORS
     assert s[0]["latitude"] == 34.1 and s[2]["missing_pct"] == 3.0
+    assert s[2]["train_congested_pct"] == pytest.approx(50.0, abs=0.1) and s[0]["train_congested_pct"] == 0.0
     d = get(client, "/api/sensors/300")
     assert d["train_congested_pct"] == pytest.approx(50.0, abs=0.1)
     assert len(d["weekday_hourly_speed"]) == 24
@@ -175,6 +176,16 @@ def test_models_and_metrics(client):
     assert r["dcrnn_minus_lightgbm"]["test"]["15"]["ci95"] == [-0.2, 0.0]
 
 
+def test_sensor_errors(client):
+    rows = get(client, "/api/metrics/sensors?model=DCRNN&horizon=15")
+    assert [r["sensor_id"] for r in rows] == ["100"]  # the synthetic results only score node 0
+    assert get(client, "/api/metrics/sensors?model=GPT&horizon=15", 422)["detail"].startswith(
+        "unknown evaluated"
+    )
+    assert "split" in get(client, "/api/metrics/sensors?model=DCRNN&horizon=15&split=train", 422)["detail"]
+    assert "horizon" in get(client, "/api/metrics/sensors?model=DCRNN&horizon=10", 422)["detail"]
+
+
 def test_analytics(client):
     p = get(client, "/api/analytics/daily-profile")
     assert p["slot_minutes"] == 5 and len(p["weekday"]) == len(p["weekend"]) == 288
@@ -209,6 +220,7 @@ def test_openapi_lists_every_endpoint(client):
         "/api/forecast/{sensor_id}",
         "/api/models",
         "/api/metrics",
+        "/api/metrics/sensors",
         "/api/analytics/daily-profile",
         "/api/analytics/weekly-congestion",
     }

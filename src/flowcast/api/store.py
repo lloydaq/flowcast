@@ -207,21 +207,43 @@ class ForecastStore:
                 "longitude": float(lon),
                 "free_flow": _num(self.free_flow[n]),
                 "missing_pct": float(miss),
+                "train_congested_pct": _num(self.train_congested_pct[n]),
             }
             for n, sid, lat, lon, miss in zip(
                 s["node_id"], s["sensor_id"], s["latitude"], s["longitude"], s["missing_pct"], strict=True
             )
         ]
 
+    @cached_property
+    def train_congested_pct(self) -> np.ndarray:
+        """Per sensor: share of its training readings below 0.6 x its free-flow speed."""
+        v = self.train_speed.to_numpy(np.float64)
+        ok = ~np.isnan(v)
+        with np.errstate(invalid="ignore"):
+            return ((v < CONGESTION_RATIO * self.free_flow) & ok).sum(0) / np.maximum(ok.sum(0), 1) * 100
+
+    def sensor_errors(self, model: str, split: str, minutes: int) -> list[dict]:
+        """Every sensor's masked MAE for one evaluated model, split and horizon; worst first."""
+        if model not in self.results:
+            raise InvalidQueryError(
+                f"unknown evaluated model {model!r}; expected one of {list(self.results)}"
+            )
+        if split not in ("validation", "test"):
+            raise InvalidQueryError("split must be 'validation' or 'test'")
+        by_node = self.results[model][split][f"h{HORIZONS[self.horizon_index(minutes)]}"]["mae_by_sensor"]
+        rows = [
+            {"sensor_id": self.sensors["sensor_id"].iat[int(n)], "mae": round(float(v), 3)}
+            for n, v in by_node.items()
+        ]
+        return sorted(rows, key=lambda r: -r["mae"])
+
     def _sensor_detail(self, node: int) -> dict:
         col = self.train_speed.iloc[:, node]
-        ff = self.free_flow[node]
         weekday = col[col.index.day_of_week < 5]
         hourly = weekday.groupby(weekday.index.hour).mean()
         return {
             **self.sensor_list[node],
             "train_mean_speed": _num(col.mean()),
-            "train_congested_pct": _num(float((col.dropna() < CONGESTION_RATIO * ff).mean() * 100)),
             "weekday_hourly_speed": [_num(hourly.get(h, np.nan)) for h in range(24)],
         }
 

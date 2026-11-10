@@ -60,6 +60,8 @@ Last updated: 2026-11-08 (Phase 5 complete). Current state: Phase 6 (graph deep 
 | 2026-11-10 | Backend: Parquet-only, no database | Data is static and ~10 MB; PostgreSQL only when mutable state appears |
 | 2026-11-10 | API serves the saved test-period predictions (dense arrays), not live inference | Identical numbers to live inference and to the metrics; no torch/LightGBM in the API; cheap to host |
 | 2026-11-10 | API in `src/flowcast/api/`; default model DCRNN; in-range outage times return null, not 422 | One package, shared code; lowest MAE; a replay slider never hits an error |
+| 2026-11-10 | Frontend: plain CSS on the §10 tokens, own SVG charts, greyscale OSM tiles; light theme by default | Every shadcn default would be replaced; §10.7 rules fight Recharts; CARTO now needs a key; the dealt style is light |
+| 2026-11-10 | Default replay time Tue 12 Jun 2012 16:30 | The evening build-up: 63 sensors congested now, 82 forecast within 30 min |
 
 ## Conventions
 
@@ -83,7 +85,8 @@ python scripts/train_dcrnn.py       # DCRNN on GPU, ~134 s/epoch, 100 epochs (~3
 python scripts/compare_models.py    # docs/model_comparison.md + models/metrics/comparison.json
 uvicorn flowcast.api.app:app        # API (store loads in ~1 s); docs at /docs
 python scripts/benchmark_api.py     # latency over HTTP -> models/metrics/api_latency.json
-pytest                              # 90 tests at end of Phase 7
+pytest                              # 91 tests at end of Phase 8
+cd frontend; npm run dev            # dashboard on :5173 (needs the API on :8000); npm test, npm run typecheck
 ruff check . ; ruff format --check .
 ```
 
@@ -104,4 +107,7 @@ ruff check . ; ruff format --check .
 - Run long GPU training from your own PowerShell window, not through Claude Code (its background reaper killed one run at epoch 45).
 - The API store indexes time by row position, so the speed matrix must be a gap-free 5-minute grid (checked at load).
 - The API needs `data/processed/` and the saved test predictions; they are git-ignored, so deployment (Phase 10) must ship or rebuild them.
+- `vite preview` binds to `localhost` (IPv6), not 127.0.0.1: point tools at http://localhost:4173.
+- CARTO basemap tiles now answer "API key required"; the map uses greyscale OSM tiles.
+- After any API schema change run `python scripts/export_openapi.py`, then `npm run api:types` in frontend/.
 - Validation contains Memorial Day (Mon 2012-05-28). Training has no US federal holidays.

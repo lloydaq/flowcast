@@ -1,0 +1,1196 @@
+{
+ "openapi": "3.1.0",
+ "info": {
+  "title": "FlowCast API",
+  "description": "Replay-clock traffic speed forecasts for 207 METR-LA sensors (test period, June 2012).",
+  "version": "0.1.0"
+ },
+ "paths": {
+  "/api/health": {
+   "get": {
+    "tags": [
+     "meta"
+    ],
+    "summary": "Health",
+    "operationId": "health_api_health_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Health"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/sensors": {
+   "get": {
+    "tags": [
+     "sensors"
+    ],
+    "summary": "Sensors",
+    "operationId": "sensors_api_sensors_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "items": {
+          "$ref": "#/components/schemas/Sensor"
+         },
+         "type": "array",
+         "title": "Response Sensors Api Sensors Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/sensors/{sensor_id}": {
+   "get": {
+    "tags": [
+     "sensors"
+    ],
+    "summary": "Sensor",
+    "operationId": "sensor_api_sensors__sensor_id__get",
+    "parameters": [
+     {
+      "name": "sensor_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Sensor Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SensorDetail"
+        }
+       }
+      }
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Problem"
+        }
+       }
+      },
+      "description": "Not Found"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Problem"
+        }
+       }
+      },
+      "description": "Unprocessable Entity"
+     }
+    }
+   }
+  },
+  "/api/forecast": {
+   "get": {
+    "tags": [
+     "forecast"
+    ],
+    "summary": "Network Forecast",
+    "operationId": "network_forecast_api_forecast_get",
+    "parameters": [
+     {
+      "name": "as_of",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "date-time",
+       "description": "Replay time, local LA, on the 5-minute grid",
+       "examples": [
+        "2012-06-05T08:00"
+       ],
+       "title": "As Of"
+      },
+      "description": "Replay time, local LA, on the 5-minute grid"
+     },
+     {
+      "name": "horizon",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "description": "Minutes ahead: one of [15, 30, 45, 60]",
+       "title": "Horizon"
+      },
+      "description": "Minutes ahead: one of [15, 30, 45, 60]"
+     },
+     {
+      "name": "model",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "One of ['dcrnn', 'lightgbm']; default dcrnn",
+       "title": "Model"
+      },
+      "description": "One of ['dcrnn', 'lightgbm']; default dcrnn"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/NetworkForecast"
+        }
+       }
+      }
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Problem"
+        }
+       }
+      },
+      "description": "Not Found"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Problem"
+        }
+       }
+      },
+      "description": "Unprocessable Entity"
+     }
+    }
+   }
+  },
+  "/api/forecast/{sensor_id}": {
+   "get": {
+    "tags": [
+     "forecast"
+    ],
+    "summary": "Sensor Forecast",
+    "operationId": "sensor_forecast_api_forecast__sensor_id__get",
+    "parameters": [
+     {
+      "name": "sensor_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Sensor Id"
+      }
+     },
+     {
+      "name": "as_of",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "date-time",
+       "description": "Replay time, local LA, on the 5-minute grid",
+       "examples": [
+        "2012-06-05T08:00"
+       ],
+       "title": "As Of"
+      },
+      "description": "Replay time, local LA, on the 5-minute grid"
+     },
+     {
+      "name": "history_hours",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 24,
+       "minimum": 1,
+       "description": "Hours of readings before as_of",
+       "default": 3,
+       "title": "History Hours"
+      },
+      "description": "Hours of readings before as_of"
+     },
+     {
+      "name": "model",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "One of ['dcrnn', 'lightgbm']; default dcrnn",
+       "title": "Model"
+      },
+      "description": "One of ['dcrnn', 'lightgbm']; default dcrnn"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SensorForecast"
+        }
+       }
+      }
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Problem"
+        }
+       }
+      },
+      "description": "Not Found"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Problem"
+        }
+       }
+      },
+      "description": "Unprocessable Entity"
+     }
+    }
+   }
+  },
+  "/api/models": {
+   "get": {
+    "tags": [
+     "models"
+    ],
+    "summary": "Models",
+    "operationId": "models_api_models_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "items": {
+          "$ref": "#/components/schemas/ModelInfo"
+         },
+         "type": "array",
+         "title": "Response Models Api Models Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/metrics": {
+   "get": {
+    "tags": [
+     "models"
+    ],
+    "summary": "Metrics",
+    "operationId": "metrics_api_metrics_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Metrics"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/metrics/sensors": {
+   "get": {
+    "tags": [
+     "models"
+    ],
+    "summary": "Sensor Errors",
+    "description": "Masked MAE per sensor, worst first.",
+    "operationId": "sensor_errors_api_metrics_sensors_get",
+    "parameters": [
+     {
+      "name": "model",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "An evaluated model's name as listed by /api/metrics",
+       "title": "Model"
+      },
+      "description": "An evaluated model's name as listed by /api/metrics"
+     },
+     {
+      "name": "horizon",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "integer",
+       "description": "Minutes ahead: one of [15, 30, 45, 60]",
+       "title": "Horizon"
+      },
+      "description": "Minutes ahead: one of [15, 30, 45, 60]"
+     },
+     {
+      "name": "split",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "description": "validation or test",
+       "default": "test",
+       "title": "Split"
+      },
+      "description": "validation or test"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "array",
+         "items": {
+          "$ref": "#/components/schemas/SensorError"
+         },
+         "title": "Response Sensor Errors Api Metrics Sensors Get"
+        }
+       }
+      }
+     },
+     "404": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Problem"
+        }
+       }
+      },
+      "description": "Not Found"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Problem"
+        }
+       }
+      },
+      "description": "Unprocessable Entity"
+     }
+    }
+   }
+  },
+  "/api/analytics/daily-profile": {
+   "get": {
+    "tags": [
+     "analytics"
+    ],
+    "summary": "Daily Profile",
+    "operationId": "daily_profile_api_analytics_daily_profile_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DailyProfile"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/analytics/weekly-congestion": {
+   "get": {
+    "tags": [
+     "analytics"
+    ],
+    "summary": "Weekly Congestion",
+    "operationId": "weekly_congestion_api_analytics_weekly_congestion_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/WeeklyCongestion"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "components": {
+  "schemas": {
+   "DailyProfile": {
+    "properties": {
+     "slot_minutes": {
+      "type": "integer",
+      "title": "Slot Minutes"
+     },
+     "weekday": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Weekday"
+     },
+     "weekend": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Weekend"
+     }
+    },
+    "type": "object",
+    "required": [
+     "slot_minutes",
+     "weekday",
+     "weekend"
+    ],
+    "title": "DailyProfile"
+   },
+   "Gap": {
+    "properties": {
+     "mae_gap": {
+      "type": "number",
+      "title": "Mae Gap"
+     },
+     "ci95": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array",
+      "title": "Ci95"
+     },
+     "days": {
+      "type": "integer",
+      "title": "Days"
+     },
+     "days_dcrnn_better": {
+      "type": "integer",
+      "title": "Days Dcrnn Better"
+     }
+    },
+    "type": "object",
+    "required": [
+     "mae_gap",
+     "ci95",
+     "days",
+     "days_dcrnn_better"
+    ],
+    "title": "Gap"
+   },
+   "Health": {
+    "properties": {
+     "status": {
+      "type": "string",
+      "title": "Status"
+     },
+     "models": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Models"
+     },
+     "default_model": {
+      "type": "string",
+      "title": "Default Model"
+     },
+     "replay_start": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Replay Start",
+      "description": "First as-of time the replay clock serves"
+     },
+     "replay_end": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Replay End",
+      "description": "Last as-of time the replay clock serves"
+     },
+     "step_min": {
+      "type": "integer",
+      "title": "Step Min"
+     },
+     "horizons_min": {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array",
+      "title": "Horizons Min"
+     },
+     "sensors": {
+      "type": "integer",
+      "title": "Sensors"
+     }
+    },
+    "type": "object",
+    "required": [
+     "status",
+     "models",
+     "default_model",
+     "replay_start",
+     "replay_end",
+     "step_min",
+     "horizons_min",
+     "sensors"
+    ],
+    "title": "Health"
+   },
+   "HorizonForecast": {
+    "properties": {
+     "horizon_min": {
+      "type": "integer",
+      "title": "Horizon Min"
+     },
+     "target_time": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Target Time"
+     },
+     "forecast": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Forecast"
+     },
+     "actual": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Actual"
+     }
+    },
+    "type": "object",
+    "required": [
+     "horizon_min",
+     "target_time",
+     "forecast",
+     "actual"
+    ],
+    "title": "HorizonForecast"
+   },
+   "HorizonScores": {
+    "properties": {
+     "all": {
+      "$ref": "#/components/schemas/Scores"
+     },
+     "peak": {
+      "$ref": "#/components/schemas/Scores"
+     },
+     "off_peak": {
+      "$ref": "#/components/schemas/Scores"
+     },
+     "congested": {
+      "$ref": "#/components/schemas/Scores"
+     },
+     "free_flowing": {
+      "$ref": "#/components/schemas/Scores"
+     },
+     "mae_by_hour": {
+      "additionalProperties": {
+       "type": "number"
+      },
+      "type": "object",
+      "title": "Mae By Hour"
+     }
+    },
+    "type": "object",
+    "required": [
+     "all",
+     "peak",
+     "off_peak",
+     "congested",
+     "free_flowing",
+     "mae_by_hour"
+    ],
+    "title": "HorizonScores"
+   },
+   "Metrics": {
+    "properties": {
+     "models": {
+      "items": {
+       "$ref": "#/components/schemas/ModelScores"
+      },
+      "type": "array",
+      "title": "Models",
+      "description": "Every model, weakest baseline first"
+     },
+     "dcrnn_minus_lightgbm": {
+      "additionalProperties": {
+       "additionalProperties": {
+        "$ref": "#/components/schemas/Gap"
+       },
+       "type": "object"
+      },
+      "type": "object",
+      "title": "Dcrnn Minus Lightgbm",
+      "description": "MAE gap by split and horizon with a 95% day-block bootstrap interval"
+     }
+    },
+    "type": "object",
+    "required": [
+     "models",
+     "dcrnn_minus_lightgbm"
+    ],
+    "title": "Metrics"
+   },
+   "ModelInfo": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "label": {
+      "type": "string",
+      "title": "Label"
+     },
+     "description": {
+      "type": "string",
+      "title": "Description"
+     },
+     "default": {
+      "type": "boolean",
+      "title": "Default"
+     },
+     "test_mae": {
+      "additionalProperties": {
+       "type": "number"
+      },
+      "type": "object",
+      "title": "Test Mae",
+      "description": "Test-period masked MAE by horizon (minutes)"
+     }
+    },
+    "type": "object",
+    "required": [
+     "name",
+     "label",
+     "description",
+     "default",
+     "test_mae"
+    ],
+    "title": "ModelInfo"
+   },
+   "ModelScores": {
+    "properties": {
+     "model": {
+      "type": "string",
+      "title": "Model"
+     },
+     "validation": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/HorizonScores"
+      },
+      "type": "object",
+      "title": "Validation"
+     },
+     "test": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/HorizonScores"
+      },
+      "type": "object",
+      "title": "Test"
+     }
+    },
+    "type": "object",
+    "required": [
+     "model",
+     "validation",
+     "test"
+    ],
+    "title": "ModelScores"
+   },
+   "NetworkForecast": {
+    "properties": {
+     "model": {
+      "type": "string",
+      "title": "Model"
+     },
+     "as_of": {
+      "type": "string",
+      "format": "date-time",
+      "title": "As Of"
+     },
+     "horizon_min": {
+      "type": "integer",
+      "title": "Horizon Min"
+     },
+     "target_time": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Target Time"
+     },
+     "sensors": {
+      "items": {
+       "$ref": "#/components/schemas/NetworkPoint"
+      },
+      "type": "array",
+      "title": "Sensors"
+     }
+    },
+    "type": "object",
+    "required": [
+     "model",
+     "as_of",
+     "horizon_min",
+     "target_time",
+     "sensors"
+    ],
+    "title": "NetworkForecast"
+   },
+   "NetworkPoint": {
+    "properties": {
+     "sensor_id": {
+      "type": "string",
+      "title": "Sensor Id"
+     },
+     "speed_now": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Speed Now"
+     },
+     "forecast": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Forecast"
+     },
+     "actual": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Actual",
+      "description": "Speed observed at target_time (replay only)"
+     },
+     "free_flow": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Free Flow"
+     },
+     "congested": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Congested",
+      "description": "forecast < 0.6 \u00d7 free flow"
+     }
+    },
+    "type": "object",
+    "required": [
+     "sensor_id",
+     "speed_now",
+     "forecast",
+     "actual",
+     "free_flow",
+     "congested"
+    ],
+    "title": "NetworkPoint"
+   },
+   "Problem": {
+    "properties": {
+     "detail": {
+      "type": "string",
+      "title": "Detail"
+     }
+    },
+    "type": "object",
+    "required": [
+     "detail"
+    ],
+    "title": "Problem"
+   },
+   "Reading": {
+    "properties": {
+     "time": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Time"
+     },
+     "speed": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Speed"
+     }
+    },
+    "type": "object",
+    "required": [
+     "time",
+     "speed"
+    ],
+    "title": "Reading"
+   },
+   "Scores": {
+    "properties": {
+     "mae": {
+      "type": "number",
+      "title": "Mae"
+     },
+     "rmse": {
+      "type": "number",
+      "title": "Rmse"
+     },
+     "mape": {
+      "type": "number",
+      "title": "Mape"
+     },
+     "n": {
+      "type": "integer",
+      "title": "N"
+     }
+    },
+    "type": "object",
+    "required": [
+     "mae",
+     "rmse",
+     "mape",
+     "n"
+    ],
+    "title": "Scores"
+   },
+   "Sensor": {
+    "properties": {
+     "sensor_id": {
+      "type": "string",
+      "title": "Sensor Id"
+     },
+     "latitude": {
+      "type": "number",
+      "title": "Latitude"
+     },
+     "longitude": {
+      "type": "number",
+      "title": "Longitude"
+     },
+     "free_flow": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Free Flow",
+      "description": "85th-percentile training speed, mph"
+     },
+     "missing_pct": {
+      "type": "number",
+      "title": "Missing Pct"
+     },
+     "train_congested_pct": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Train Congested Pct",
+      "description": "Share of training readings congested, %"
+     }
+    },
+    "type": "object",
+    "required": [
+     "sensor_id",
+     "latitude",
+     "longitude",
+     "free_flow",
+     "missing_pct",
+     "train_congested_pct"
+    ],
+    "title": "Sensor"
+   },
+   "SensorDetail": {
+    "properties": {
+     "sensor_id": {
+      "type": "string",
+      "title": "Sensor Id"
+     },
+     "latitude": {
+      "type": "number",
+      "title": "Latitude"
+     },
+     "longitude": {
+      "type": "number",
+      "title": "Longitude"
+     },
+     "free_flow": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Free Flow",
+      "description": "85th-percentile training speed, mph"
+     },
+     "missing_pct": {
+      "type": "number",
+      "title": "Missing Pct"
+     },
+     "train_congested_pct": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Train Congested Pct",
+      "description": "Share of training readings congested, %"
+     },
+     "train_mean_speed": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Train Mean Speed"
+     },
+     "weekday_hourly_speed": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Weekday Hourly Speed",
+      "description": "Training weekday mean speed, hours 0\u201323"
+     }
+    },
+    "type": "object",
+    "required": [
+     "sensor_id",
+     "latitude",
+     "longitude",
+     "free_flow",
+     "missing_pct",
+     "train_congested_pct",
+     "train_mean_speed",
+     "weekday_hourly_speed"
+    ],
+    "title": "SensorDetail"
+   },
+   "SensorError": {
+    "properties": {
+     "sensor_id": {
+      "type": "string",
+      "title": "Sensor Id"
+     },
+     "mae": {
+      "type": "number",
+      "title": "Mae"
+     }
+    },
+    "type": "object",
+    "required": [
+     "sensor_id",
+     "mae"
+    ],
+    "title": "SensorError"
+   },
+   "SensorForecast": {
+    "properties": {
+     "model": {
+      "type": "string",
+      "title": "Model"
+     },
+     "sensor_id": {
+      "type": "string",
+      "title": "Sensor Id"
+     },
+     "as_of": {
+      "type": "string",
+      "format": "date-time",
+      "title": "As Of"
+     },
+     "free_flow": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Free Flow"
+     },
+     "history": {
+      "items": {
+       "$ref": "#/components/schemas/Reading"
+      },
+      "type": "array",
+      "title": "History"
+     },
+     "forecasts": {
+      "items": {
+       "$ref": "#/components/schemas/HorizonForecast"
+      },
+      "type": "array",
+      "title": "Forecasts"
+     },
+     "actual_after": {
+      "items": {
+       "$ref": "#/components/schemas/Reading"
+      },
+      "type": "array",
+      "title": "Actual After",
+      "description": "Readings in the hour after as_of (replay only)"
+     }
+    },
+    "type": "object",
+    "required": [
+     "model",
+     "sensor_id",
+     "as_of",
+     "free_flow",
+     "history",
+     "forecasts",
+     "actual_after"
+    ],
+    "title": "SensorForecast"
+   },
+   "WeeklyCongestion": {
+    "properties": {
+     "rate_pct": {
+      "items": {
+       "items": {
+        "anyOf": [
+         {
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "type": "array"
+      },
+      "type": "array",
+      "title": "Rate Pct",
+      "description": "7 days (Mon first) \u00d7 24 hours, training period"
+     }
+    },
+    "type": "object",
+    "required": [
+     "rate_pct"
+    ],
+    "title": "WeeklyCongestion"
+   }
+  }
+ }
+}
