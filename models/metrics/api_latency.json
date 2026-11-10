@@ -1,0 +1,27 @@
+{
+ "git_commit": "73f9afd + uncommitted changes",
+ "setup": "uvicorn, 1 worker, HTTP over loopback on the development laptop (Ryzen 7 7840HS); network time to a remote client excluded",
+ "store_load_s": 0.3,
+ "peak_rss_mb": 626,
+ "network_forecast_cold": {
+  "requests": 300,
+  "p50_ms": 3.49,
+  "p95_ms": 4.66,
+  "p99_ms": 5.39,
+  "response_kb": 21.9
+ },
+ "network_forecast_warm": {
+  "requests": 300,
+  "p50_ms": 1.84,
+  "p95_ms": 2.55,
+  "p99_ms": 3.51,
+  "response_kb": 21.9
+ },
+ "sensor_forecast": {
+  "requests": 300,
+  "p50_ms": 1.91,
+  "p95_ms": 2.75,
+  "p99_ms": 3.51,
+  "response_kb": 2.6
+ }
+}

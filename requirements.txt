@@ -1,2 +1,2 @@
 # Dependencies are declared in pyproject.toml; this installs the package plus dev tools.
--e .[dev]
+-e .[dev,api]

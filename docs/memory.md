@@ -57,7 +57,9 @@ Last updated: 2026-11-08 (Phase 5 complete). Current state: Phase 6 (graph deep 
 | 2026-11-10 | All models scored through `flowcast/evaluation/rows.py` (same rows, same masked metrics) | A comparison is only fair on identical rows |
 | 2026-11-10 | Model differences judged by a 95% day-block bootstrap of the MAE gap; claimed only if the interval excludes 0 | Errors within a day are correlated; one seed cannot show significance by itself |
 | 2026-11-10 | DCRNN checkpoint in `models/checkpoints/dcrnn/` (`model.pt` best weights, `last.pt` resumable state; git-ignored) | Training saves every epoch, so a kill loses at most one epoch |
-| *open* | PostgreSQL vs Parquet-only backend | Decide before Phase 7 ([architect.md](architect.md) §6) |
+| 2026-11-10 | Backend: Parquet-only, no database | Data is static and ~10 MB; PostgreSQL only when mutable state appears |
+| 2026-11-10 | API serves the saved test-period predictions (dense arrays), not live inference | Identical numbers to live inference and to the metrics; no torch/LightGBM in the API; cheap to host |
+| 2026-11-10 | API in `src/flowcast/api/`; default model DCRNN; in-range outage times return null, not 422 | One package, shared code; lowest MAE; a replay slider never hits an error |
 
 ## Conventions
 
@@ -79,7 +81,9 @@ python scripts/tune_lightgbm.py     # validation-only search -> models/metrics/l
 python scripts/train_lightgbm.py    # final models, test scored once, model card + figures (~60 min)
 python scripts/train_dcrnn.py       # DCRNN on GPU, ~134 s/epoch, 100 epochs (~3.7 h); --resume continues
 python scripts/compare_models.py    # docs/model_comparison.md + models/metrics/comparison.json
-pytest                              # 66 tests at end of Phase 6
+uvicorn flowcast.api.app:app        # API (store loads in ~1 s); docs at /docs
+python scripts/benchmark_api.py     # latency over HTTP -> models/metrics/api_latency.json
+pytest                              # 90 tests at end of Phase 7
 ruff check . ; ruff format --check .
 ```
 
@@ -98,4 +102,6 @@ ruff check . ; ruff format --check .
 - Print generated reports with `reporting.print_report`: a plain `print` of `→`/`−` crashes on a cp1252 console after the run's files are written.
 - DCRNN training MAE rises after epoch ~25 because of scheduled sampling; judge it on validation only.
 - Run long GPU training from your own PowerShell window, not through Claude Code (its background reaper killed one run at epoch 45).
+- The API store indexes time by row position, so the speed matrix must be a gap-free 5-minute grid (checked at load).
+- The API needs `data/processed/` and the saved test predictions; they are git-ignored, so deployment (Phase 10) must ship or rebuild them.
 - Validation contains Memorial Day (Mon 2012-05-28). Training has no US federal holidays.

@@ -10,3 +10,6 @@ SPEED_PATH = PROCESSED_DIR / "metr_la_speed.parquet"
 SENSORS_PATH = PROCESSED_DIR / "metr_la_sensors.parquet"
 SPLITS_PATH = PROCESSED_DIR / "metr_la_splits.json"
 REPORT_PATH = PROCESSED_DIR / "metr_la_validation_report.json"
+
+METRICS_DIR = PROJECT_ROOT / "models" / "metrics"
+PREDICTIONS_DIR = PROCESSED_DIR / "predictions"

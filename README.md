@@ -12,7 +12,8 @@
 | 4 | Baselines and evaluation ([results](docs/baseline_results.md), [experiments](docs/experiments.md)) | ✅ done |
 | 5 | LightGBM ([model card](docs/model_card_lightgbm.md)) | ✅ done |
 | 6 | Graph deep learning ([DCRNN card](docs/model_card_dcrnn.md), [comparison](docs/model_comparison.md)) | ✅ done |
-| 7–10 | FastAPI backend, React dashboard, integration, release | planned |
+| 7 | FastAPI backend (replay-clock forecasts; OpenAPI at `/docs`) | ✅ done |
+| 8–10 | React dashboard, integration, release | planned |
 
 ## Setup (Windows / PowerShell)
 
@@ -32,6 +33,8 @@ python scripts/train_lightgbm.py    # final LightGBM models + model card (~60 mi
 pip install torch --index-url https://download.pytorch.org/whl/cu126   # CUDA PyTorch, once
 python scripts/train_dcrnn.py       # DCRNN on the GPU + model card (~3.7 h; --resume after a crash)
 python scripts/compare_models.py    # side-by-side table + significance -> docs/model_comparison.md
+uvicorn flowcast.api.app:app        # API on http://127.0.0.1:8000 (interactive docs at /docs)
+python scripts/benchmark_api.py     # API latency over HTTP -> models/metrics/api_latency.json
 pytest                              # unit tests + data integration tests
 ruff check .
 ```
@@ -53,6 +56,8 @@ src/flowcast/models/baselines.py  persistence, historical average, seasonal naiv
 src/flowcast/models/lgbm.py       LightGBM loading, training, group permutation importance
 src/flowcast/models/dcrnn.py      DCRNN (diffusion convolution GRU encoder-decoder) and its data windows
 src/flowcast/evaluation/rows.py   the shared evaluation rows every model is scored on
+src/flowcast/evaluation/results.py every model's committed metrics JSON, in one place
+src/flowcast/api/                 FastAPI app, in-memory forecast store, response schemas
 src/flowcast/reporting.py         figure style, git commit, memory and report-printing helpers
 src/flowcast/analysis/eda.py      EDA statistics (congestion, profiles, autocorrelation, spatial)
 scripts/run_eda.py                EDA figures and summary (training period only)

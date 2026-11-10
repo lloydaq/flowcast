@@ -114,16 +114,18 @@ The backend serves whichever model is registered in the model registry, so model
 - Model selection uses **validation only**. The test period is scored once per final model, and that score is what the README reports.
 - Every run writes its configuration (git commit, parameters, feature list, data hashes) next to its metrics.
 
-## 6. Backend *(Phase 7, proposed)*
+## 6. Backend *(Phase 7, built)*
 
 ```text
-backend/app/
-  main.py            FastAPI app, CORS (frontend origin only), lifespan loads models once
-  core/config.py     settings via pydantic-settings (.env, no secrets needed)
-  api/               routers: health, sensors, forecast, metrics, analytics
-  schemas/           Pydantic request/response models
-  services/          thin wrappers over flowcast.forecasting / evaluation
+src/flowcast/api/
+  app.py      FastAPI app factory, routes, CORS (frontend origins only), error mapping; store loaded once at startup
+  store.py    ForecastStore: all served data in memory, validation of as_of / horizon / model / sensor, caching
+  schemas.py  Pydantic response models (these define the OpenAPI schema)
 ```
+
+The API lives inside the `flowcast` package (not a separate `backend/` tree) so it imports the shared congestion, evaluation and data code directly and installs with one `pip install -e .[api]`.
+
+**Decided 2026-11-10 — precomputed forecasts.** The API serves the test-period forecasts each model saved during evaluation (`data/processed/predictions/{model}_test.parquet`), held as dense (time × sensor × horizon) arrays. They are exactly what live inference would return (each was computed from readings ≤ its as-of time) and exactly what the metrics score. No PyTorch or LightGBM in the API. The replay range is 2012-06-04 04:10 → 2012-06-27 22:55; the 546 in-range times with no saved rows (network-wide outages, all targets missing) return `null` forecasts rather than errors.
 
 | Endpoint | Returns |
 |---|---|
@@ -132,13 +134,15 @@ backend/app/
 | `GET /api/sensors/{sensor_id}` | one sensor plus summary statistics |
 | `GET /api/forecast?as_of=…&horizon=…` | the whole network at one horizon (for the map) |
 | `GET /api/forecast/{sensor_id}?as_of=…&history=3h` | history up to `as_of`, forecasts at 4 horizons, and the actuals that followed |
-| `GET /api/models`, `GET /api/metrics` | registered models; evaluation results from the committed JSON |
-| `GET /api/analytics/...` | precomputed profiles (time of day, weekly congestion) |
+| `GET /api/models`, `GET /api/metrics` | registered models (default: DCRNN); every model's scores by split, horizon and slice, plus the DCRNN − LightGBM bootstrap gap |
+| `GET /api/analytics/daily-profile` | network mean speed per 5-min slot, weekday vs weekend (training period) |
+| `GET /api/analytics/weekly-congestion` | congested share by day of week × hour (training period) |
 
-- Inputs are validated by Pydantic. `as_of` must fall on the 5-minute grid inside the test period, otherwise the API returns 422 with a clear message. Sensor IDs are checked against the registry.
+- Inputs are validated. `as_of` must be timezone-free local time on the 5-minute grid inside the replay range, `horizon` one of 15/30/45/60, `model` a registry name: otherwise 422 with a reason. Unknown sensor IDs are 404.
 - No endpoint accepts a file path or model path. Models are referenced by registry name only.
 - Responses are cached in memory, keyed by (`as_of`, horizon, model), because the data is immutable.
-- **Open decision — PostgreSQL.** The original plan lists PostgreSQL. All data is static, and the processed data is 10 MB, so Parquet plus in-memory serving is simpler and faster for this phase. Proposal: no database in Phase 7. Add PostgreSQL only when there is mutable state (e.g. saved views or user annotations). To be confirmed with the developer before Phase 7.
+- **Decided 2026-11-10 — no database.** All data is static and small, so Parquet plus in-memory serving is simpler and faster. PostgreSQL is added only when there is mutable state (e.g. saved views or user annotations); data access is confined to `store.py`, so that change stays local.
+- Latency is measured over real HTTP by `scripts/benchmark_api.py` → `models/metrics/api_latency.json`.
 
 ## 7. Testing and CI *(proposed)*
 

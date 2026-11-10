@@ -19,30 +19,17 @@ import pandas as pd
 
 from flowcast import paths
 from flowcast.data.processed import load_speed
+from flowcast.evaluation.results import SPLITS, load_results
 from flowcast.evaluation.rows import load_eval_rows
 from flowcast.features.build import HORIZONS
 from flowcast.reporting import print_report
 
 ROOT = paths.PROJECT_ROOT
-METRICS = ROOT / "models" / "metrics"
-PREDICTIONS = paths.PROCESSED_DIR / "predictions"
+METRICS = paths.METRICS_DIR
+PREDICTIONS = paths.PREDICTIONS_DIR
 OUT_MD = ROOT / "docs" / "model_comparison.md"
 OUT_JSON = METRICS / "comparison.json"
 N_BOOT, SEED = 2000, 0
-SPLITS = ("validation", "test")
-
-
-def load_results() -> dict[str, dict]:
-    base = json.loads((METRICS / "baselines.json").read_text(encoding="utf-8"))["results"]
-    models = {
-        "persistence": {s: base[s]["persistence"] for s in SPLITS},
-        "historical average": {s: base[s]["historical_average"] for s in SPLITS},
-        "seasonal naive (week)": {s: base[s]["seasonal_naive_week"] for s in SPLITS},
-        "AR on residuals": {s: base[s]["ar_residual"] for s in SPLITS},
-    }
-    for name, file in (("LightGBM", "lightgbm.json"), ("DCRNN", "dcrnn.json")):
-        models[name] = json.loads((METRICS / file).read_text(encoding="utf-8"))["results"]
-    return models
 
 
 def bootstrap_gap(speed: pd.DataFrame) -> dict:

@@ -13,8 +13,8 @@ Related: [architect.md](architect.md) · [memory.md](memory.md)
 | 4 | Baselines and evaluation framework | ✅ done | see git log |
 | 5 | LightGBM | ✅ done | see git log |
 | 6 | Graph deep learning (DCRNN) | ✅ done | see git log |
-| 7 | Backend (FastAPI) | ⏭ next | |
-| 8 | Frontend (React) | planned | |
+| 7 | Backend (FastAPI) | ✅ done | see git log |
+| 8 | Frontend (React) | ⏭ next | |
 | 9 | Integration and testing | planned | |
 | 10 | Deployment and open-source release | planned | |
 
@@ -117,10 +117,12 @@ Result: lowest MAE at every horizon (validation 2.44–3.22, test 2.64–3.47); 
 - Same splits, same masked metrics, same test period as LightGBM.
 - **Exit:** a side-by-side comparison table. Any improvement is claimed only if the results show it.
 
-## Phase 7 — Backend
+## Phase 7 — Backend ✅
+
+Result: nine read-only endpoints serving precomputed replay forecasts from memory (no database); 24 API tests including every 422/404 path; OpenAPI at `/docs`; network forecast p95 4.7 ms uncached over loopback HTTP ([api_latency.json](../models/metrics/api_latency.json)). See [architect.md](architect.md) §6.
 
 - FastAPI with typed schemas, the replay-clock forecast service, sensors / forecast / models / metrics / analytics endpoints, and in-memory caching.
-- **Decision needed before starting:** PostgreSQL or Parquet-only ([architect.md](architect.md) §6).
+- **Decided:** Parquet-only, precomputed forecasts ([architect.md](architect.md) §6).
 - **Exit:** every endpoint tested, including validation errors; OpenAPI docs; p95 latency of the network forecast measured.
 
 ## Phase 8 — Frontend
