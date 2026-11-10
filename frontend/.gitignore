@@ -3,3 +3,7 @@ dist/
 *.tsbuildinfo
 test-results/
 playwright-report/
+.static/
+.static-samples.json
+dist-static/
+.gif-frames/

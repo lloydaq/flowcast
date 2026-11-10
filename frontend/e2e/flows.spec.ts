@@ -6,7 +6,7 @@ const AT = "t=2012-06-12T16:30&h=30";
 
 test.describe("Network", () => {
   test("opens on the replay time with the forecast, the map and the figures", async ({ page }) => {
-    await page.goto(`/?${AT}`);
+    await page.goto(`./?${AT}`);
     await expect(page.getByRole("heading", { level: 1, name: "Network" })).toBeVisible();
     await expect(page.locator(".finding")).toContainText("82 sensors forecast congested by 17:00, 19 more than now");
     await expect(page.locator(".map path.fc-marker")).toHaveCount(207);
@@ -15,7 +15,7 @@ test.describe("Network", () => {
   });
 
   test("changing the horizon rewrites the URL and the finding", async ({ page }) => {
-    await page.goto(`/?${AT}`);
+    await page.goto(`./?${AT}`);
     await page.getByRole("group", { name: "Forecast horizon" }).getByRole("button", { name: "60 min" }).click();
     await expect(page).toHaveURL(/h=60/);
     await expect(page.locator(".finding")).toContainText("by 17:30");
@@ -24,7 +24,7 @@ test.describe("Network", () => {
   });
 
   test("the replay clock steps and plays", async ({ page }) => {
-    await page.goto(`/?${AT}`);
+    await page.goto(`./?${AT}`);
     const clock = page.locator(".topbar .replay-time");
     await page.locator(".topbar").getByRole("button", { name: "Forward 5 minutes" }).click();
     await expect(clock).toContainText("16:35");
@@ -35,7 +35,7 @@ test.describe("Network", () => {
   });
 
   test("a marker opens its details, then the sensor's forecast", async ({ page }) => {
-    await page.goto(`/?${AT}`);
+    await page.goto(`./?${AT}`);
     // markers overlap on dense stretches: click where a user would, and accept whichever marker is on top
     const box = await page.locator(".map path.fc-marker").nth(40).boundingBox();
     if (!box) throw new Error("marker not rendered");
@@ -48,7 +48,7 @@ test.describe("Network", () => {
   });
 
   test("the slowing list links to a sensor and keeps the replay state", async ({ page }) => {
-    await page.goto(`/?${AT}`);
+    await page.goto(`./?${AT}`);
     await page.locator(".rows .row-link").first().click();
     await expect(page).toHaveURL(/\/sensor\/773939\?t=2012-06-12T16%3A30&h=30/);
   });
@@ -56,7 +56,7 @@ test.describe("Network", () => {
 
 test.describe("Sensor", () => {
   test("shows the forecast against what happened", async ({ page }) => {
-    await page.goto(`/sensor/773939?${AT}`);
+    await page.goto(`./sensor/773939?${AT}`);
     await expect(page.getByRole("heading", { level: 1, name: "773939" })).toBeVisible();
     await expect(page.locator(".finding")).toContainText("forecast 14 mph by 17:00");
     await expect(page.locator(".finding")).toContainText("actually 22 mph");
@@ -64,14 +64,14 @@ test.describe("Sensor", () => {
   });
 
   test("a horizon cell selects that horizon", async ({ page }) => {
-    await page.goto(`/sensor/773939?${AT}`);
+    await page.goto(`./sensor/773939?${AT}`);
     await page.locator("button.kpi", { hasText: "+60 min" }).click();
     await expect(page).toHaveURL(/h=60/);
     await expect(page.locator("button.kpi", { hasText: "+60 min" })).toHaveAttribute("aria-pressed", "true");
   });
 
   test("the history and accuracy tabs load real data", async ({ page }) => {
-    await page.goto(`/sensor/773939?${AT}`);
+    await page.goto(`./sensor/773939?${AT}`);
     await page.getByRole("link", { name: "Past 24 hours" }).click();
     await expect(page.getByRole("heading", { name: "The 24 hours up to now" })).toBeVisible();
     await page.getByRole("link", { name: "Accuracy" }).click();
@@ -80,14 +80,14 @@ test.describe("Sensor", () => {
   });
 
   test("an unknown sensor shows the API's reason, not a blank page", async ({ page }) => {
-    await page.goto(`/sensor/999999?${AT}`);
+    await page.goto(`./sensor/999999?${AT}`);
     await expect(page.locator(".finding")).toContainText("unknown sensor '999999'");
   });
 });
 
 test.describe("Sensors ranking", () => {
   test("ranks all 207, sorts and filters, with an empty state", async ({ page }) => {
-    await page.goto(`/sensors?${AT}`);
+    await page.goto(`./sensors?${AT}`);
     await expect(page.locator("tbody tr")).toHaveCount(207);
     await page.getByRole("button", { name: "Now" }).last().click(); // the column header, not the horizon
     await expect(page.locator("tbody tr").first().locator("td").nth(2)).toContainText("7");
@@ -100,7 +100,7 @@ test.describe("Sensors ranking", () => {
 
 test.describe("Models and Patterns", () => {
   test("the score table switches metric and highlights the best", async ({ page }) => {
-    await page.goto(`/models?${AT}`);
+    await page.goto(`./models?${AT}`);
     await expect(page.locator(".finding")).toContainText("DCRNN is the most accurate up to 45 min");
     const dcrnn = page.locator("table.data tbody tr", { hasText: "DCRNN" }).first();
     await expect(dcrnn).toContainText("2.64");
@@ -110,16 +110,17 @@ test.describe("Models and Patterns", () => {
   });
 
   test("the patterns grid has a cell for every day and hour", async ({ page }) => {
-    await page.goto(`/patterns?${AT}`);
+    await page.goto(`./patterns?${AT}`);
     await expect(page.locator(".matrix .cell")).toHaveCount(168);
     await expect(page.locator(".finding")).toContainText("Thursday at 17:00");
   });
 });
 
 test.describe("States, routing and settings", () => {
-  test("a failed request shows an in-block error, and Retry recovers", async ({ page }) => {
+  test("a failed request shows an in-block error, and Retry recovers", async ({ page }, info) => {
+    test.skip(info.project.name.startsWith("static"), "the static demo makes no API calls");
     await page.route("**/api/forecast?**", (route) => route.abort());
-    await page.goto(`/?${AT}`);
+    await page.goto(`./?${AT}`);
     await expect(page.getByRole("alert").first()).toContainText("Couldn’t load the network forecast");
     await expect(page.getByRole("heading", { level: 1, name: "Network" })).toBeVisible(); // the frame stays
     await page.unroute("**/api/forecast?**");
@@ -127,22 +128,23 @@ test.describe("States, routing and settings", () => {
     await expect(page.locator(".finding")).toContainText("82 sensors forecast congested");
   });
 
-  test("an API that is down is reported where the data would be", async ({ page }) => {
+  test("an API that is down is reported where the data would be", async ({ page }, info) => {
+    test.skip(info.project.name.startsWith("static"), "the static demo makes no API calls");
     await page.route("**/api/**", (route) => route.fulfill({ status: 503, body: "" }));
-    await page.goto(`/models?${AT}`);
+    await page.goto(`./models?${AT}`);
     await expect(page.getByRole("alert").first()).toContainText("Couldn’t load");
   });
 
   test("a garbage replay time falls back to the default; an unknown page says so", async ({ page }) => {
-    await page.goto("/?t=yesterday&h=7&m=gpt");
+    await page.goto("./?t=yesterday&h=7&m=gpt");
     await expect(page.locator(".topbar .replay-time")).toContainText("Tue 12 Jun 2012, 16:30");
     await expect(page.locator(".finding")).toContainText("forecast congested by 17:00"); // h falls back to 30
-    await page.goto("/no-such-page");
+    await page.goto("./no-such-page");
     await expect(page.getByRole("heading", { name: "Page not found" })).toBeVisible();
   });
 
   test("the theme choice persists across reloads", async ({ page }) => {
-    await page.goto("/settings");
+    await page.goto("./settings");
     await page.getByRole("group", { name: "Theme" }).getByRole("button", { name: "Dark" }).click();
     await page.reload();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
@@ -152,7 +154,7 @@ test.describe("States, routing and settings", () => {
   });
 
   test("keyboard: the skip link reaches the content", async ({ page }) => {
-    await page.goto(`/?${AT}`);
+    await page.goto(`./?${AT}`);
     await page.keyboard.press("Tab");
     await expect(page.getByRole("link", { name: "Skip to content" })).toBeFocused();
     await page.keyboard.press("Enter");
@@ -164,7 +166,7 @@ test.describe("States, routing and settings", () => {
     page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
     page.on("pageerror", (e) => errors.push(e.message));
     for (const path of ["/", "/sensors", "/sensor/773939", "/models", "/patterns", "/settings"]) {
-      await page.goto(`${path}?${AT}`);
+      await page.goto(`.${path}?${AT}`);
       await expect(page.locator("h1")).toBeVisible();
       await page.waitForLoadState("networkidle");
     }

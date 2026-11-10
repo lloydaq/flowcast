@@ -11,7 +11,11 @@
     "test": "vitest run",
     "api:types": "openapi-typescript openapi.json -o src/lib/api-types.ts",
     "e2e": "playwright test --project=desktop --project=phone",
-    "e2e:perf": "playwright test --project=perf"
+    "e2e:perf": "playwright test --project=perf",
+    "build:static": "tsc -b && vite build --mode static --outDir dist-static",
+    "preview:static": "vite preview --mode static --outDir dist-static --port 4174 --strictPort",
+    "deploy": "node scripts/deploy-pages.mjs",
+    "e2e:static": "playwright test --project=static --project=static-phone"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",
@@ -27,6 +31,7 @@
   "devDependencies": {
     "@playwright/test": "^1.65.0",
     "@types/leaflet": "^1.9.22",
+    "@types/node": "^24.19.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.3.0",

@@ -67,6 +67,7 @@ Last updated: 2026-11-08 (Phase 5 complete). Current state: Phase 6 (graph deep 
 | 2026-11-10 | README images are theme-aware `<picture>` pairs; screenshots come from `frontend/scripts/screenshots.mjs` | Real captures in both themes; the script also fails on console errors or overflow |
 | 2026-11-10 | E2E with Playwright on the installed Chrome (`channel: "chrome"`), one worker, servers reused if running | No browser download; one API process; quiet perf numbers |
 | 2026-11-10 | Security headers set by the API itself; CSP, HSTS and rate limiting left to the Phase 10 host | The API serves JSON only; the frontend's host decides its own headers |
+| 2026-11-10 | Public demo: fully static on GitHub Pages (`gh-pages` branch, force-replaced on each deploy) | The replay is a fixed past; ₹0, no cold starts, no memory limit; FastAPI stays for local use |
 
 ## Conventions
 
@@ -118,4 +119,6 @@ ruff check . ; ruff format --check .
 - After any API schema change run `python scripts/export_openapi.py`, then `npm run api:types` in frontend/.
 - Entrance animations use `animation-fill-mode: backwards`, not `both`: `both` keeps a finished animation on each of the 207 markers, which Playwright reads as never stable.
 - Map markers overlap on dense stretches: click them by position in tests.
+- The static build's CSP hashes the inline theme script after CRLF→LF, as browsers do; a Windows checkout otherwise breaks the hash.
+- `npm run deploy` needs `python scripts/export_static.py` first; the static preview is on :4174 under /flowcast/.
 - Validation contains Memorial Day (Mon 2012-05-28). Training has no US federal holidays.

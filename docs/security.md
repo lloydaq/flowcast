@@ -24,8 +24,8 @@ Every check below is automated and runs with the test suites, except the two dep
 
 ## Not covered, for Phase 10 (deployment)
 
-- **Headers for the frontend host:** a Content-Security-Policy (`default-src 'self'; img-src 'self' https://tile.openstreetmap.org data:; style-src 'self' 'unsafe-inline'`), HSTS, and the same `nosniff` and framing headers. These are set by whichever static host serves the build.
-- **Rate limiting and HTTPS** for the public API, at the host or a proxy.
+- **Headers for the frontend host:** done in Phase 10 for the GitHub Pages demo as a meta-tag CSP (`default-src 'self'`, scripts from its own origin plus the hash of the one inline script, images also from the OpenStreetMap tile server, `connect-src 'self'`, no forms, no `<base>`). GitHub Pages serves HTTPS with HSTS on github.io. It cannot send `nosniff` or framing headers, and the demo has no API to protect.
+- **Rate limiting and HTTPS** for a public API, at the host or a proxy. Not needed for the demo, which has no API.
 - **OpenAPI docs** (`/docs`) load Swagger UI from a CDN. Fine for a portfolio demo; disable `docs_url` if the API should not advertise itself.
 - **OpenStreetMap tile policy:** a busy public demo should use a keyed tile provider or self-hosted tiles.
 

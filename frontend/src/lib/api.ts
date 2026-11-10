@@ -1,6 +1,10 @@
 // Typed client for the FlowCast API. Types are generated from the backend's OpenAPI schema
 // (python scripts/export_openapi.py && npm run api:types), so a backend change breaks the build.
+import { ApiError } from "./api-error";
 import type { components } from "./api-types";
+import { createStaticApi } from "./staticApi";
+
+export { ApiError };
 
 type S = components["schemas"];
 export type Health = S["Health"];
@@ -20,16 +24,11 @@ export type DailyProfile = S["DailyProfile"];
 export type WeeklyCongestion = S["WeeklyCongestion"];
 
 const BASE: string = import.meta.env.VITE_API_BASE ?? "";
-
-export class ApiError extends Error {
-  readonly status: number;
-  constructor(message: string, status: number) {
-    super(message);
-    this.status = status;
-  }
-}
+// The GitHub Pages demo has no server: VITE_STATIC=1 answers every request from exported files.
+const staticGet = import.meta.env.VITE_STATIC === "1" ? createStaticApi(`${import.meta.env.BASE_URL}data/`) : null;
 
 export async function getJSON<T>(path: string, params?: Record<string, string | number | undefined>): Promise<T> {
+  if (staticGet) return (await staticGet(path, params)) as T;
   const query = new URLSearchParams();
   for (const [k, v] of Object.entries(params ?? {})) if (v !== undefined) query.set(k, String(v));
   const qs = query.toString();

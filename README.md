@@ -5,6 +5,14 @@
 </picture>
 
 <p align="center">
+  <a href="https://lloydaq.github.io/flowcast/"><strong>Live demo</strong></a> ·
+  <a href="#dashboard-preview">Screenshots</a> ·
+  <a href="#model-evaluation">Results</a> ·
+  <a href="docs/architect.md">Architecture</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/lloydaq/flowcast/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/lloydaq/flowcast/actions/workflows/ci.yml/badge.svg" /></a>
   <img alt="Python 3.12" src="https://img.shields.io/badge/Python-3.12-14213d?logo=python&logoColor=white" />
   <img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-DCRNN-14213d?logo=pytorch&logoColor=white" />
   <img alt="LightGBM" src="https://img.shields.io/badge/LightGBM-4.5+-14213d" />
@@ -32,6 +40,16 @@ The data is historical. Nothing in the app is live, and nothing is simulated.
 - **Dark and light themes** that follow the system by default, in the app and in this README.
 
 ## Dashboard preview
+
+**Try it: [https://lloydaq.github.io/flowcast/](https://lloydaq.github.io/flowcast/)** (no install; the whole replay runs in your browser).
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/flowcast-demo-dark.gif" />
+  <source media="(prefers-color-scheme: light)" srcset="docs/assets/flowcast-demo-light.gif" />
+  <img alt="The replay playing from 16:00 to 18:00 on 12 June 2012: the network map recolours as the evening congestion builds" src="docs/assets/flowcast-demo-light.gif" width="100%" />
+</picture>
+
+The replay playing through the evening build-up, 16:00 to 18:00 on Tuesday 12 June 2012, one frame per 5-minute step (recorded from the app by [`frontend/scripts/demo-gif.mjs`](frontend/scripts/demo-gif.mjs)).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screens/network-dark.png" />
@@ -98,6 +116,8 @@ When and where congestion happens, computed from the training period only.
 </picture>
 
 There is no database: the data is static and small, so the API holds it in memory. The full design is in [docs/architect.md](docs/architect.md).
+
+**The public demo has no server at all.** Because the replay is a fixed past, every answer the API can give is known in advance. [`scripts/export_static.py`](scripts/export_static.py) exports them (the small ones as the API's own JSON, the forecasts as compact per-day grids, 25 MB), and the browser rebuilds each answer from those files. A test checks the rebuild against 80 real API answers, value for value, and the same 21 end-to-end flows run against both versions.
 
 ## Dataset
 
@@ -174,7 +194,7 @@ src/flowcast/
   models/        baselines, LightGBM, DCRNN
   evaluation/    masked metrics, shared evaluation rows, results loader
   api/           FastAPI app, in-memory forecast store, response schemas
-scripts/         one script per pipeline step (prepare, features, train, compare, benchmark)
+scripts/         one script per pipeline step (prepare, features, train, compare, benchmark, export the demo)
 tests/           122 tests: unit, real-data integration and API security tests
 frontend/
   src/screens/     Network, Sensors, Sensor, Models, Patterns, Settings
@@ -182,6 +202,7 @@ frontend/
   src/lib/         API client, replay state, severity bands, formatting, theme
   src/styles/      tokens.css (design tokens), app.css
   e2e/             Playwright flows and the map performance check
+  scripts/         README screenshots, demo GIF, deploy to GitHub Pages
 docs/            dataset, EDA, features, experiments, model cards, architecture, security review
 models/metrics/  committed evaluation results (JSON)
 ```
@@ -221,6 +242,19 @@ npm run dev                         # dashboard on http://localhost:5173, proxie
 
 `npm run build; npm run preview` serves the production build on http://localhost:4173. A view is a URL, for example `/sensor/773939?t=2012-06-12T16:30&h=30&m=dcrnn`.
 
+## Deployment
+
+The demo is served by GitHub Pages from the `gh-pages` branch, at no cost and with no server to keep alive.
+
+```powershell
+python scripts/export_static.py     # exports every API answer the dashboard needs -> frontend/.static
+cd frontend
+npm run e2e:static                  # the 21 flows against the static build
+npm run deploy                      # builds with VITE_STATIC=1 and base /flowcast/, pushes to gh-pages
+```
+
+Pages cannot send HTTP headers, so the static build carries its Content-Security-Policy in a meta tag (scripts and data from its own origin only; images also from the OpenStreetMap tile server). To run the full API instead, see [Local development](#local-development).
+
 ## API documentation
 
 Interactive OpenAPI documentation is served at `http://127.0.0.1:8000/docs`. All endpoints are read-only.
@@ -246,12 +280,13 @@ npm test                  # 10 unit tests
 npm run typecheck
 npm run e2e               # 21 Playwright flows against the real API (desktop and phone)
 npm run e2e:perf          # map performance -> models/metrics/frontend_perf.json
+npm run e2e:static        # the same flows against the static demo build
 node scripts/screenshots.mjs   # recaptures the README screenshots; fails on console errors or overflow
 ```
 
 The end-to-end tests use your installed Chrome and start the API and the production build if they are not running. On this laptop a replay step redraws all 207 markers in 34 ms at p95 (128 ms with the CPU slowed 4×). The security review and how to re-run it are in [docs/security.md](docs/security.md).
 
-Real-data tests are skipped until `prepare_metr_la.py` has been run. There is no hosted CI yet.
+Real-data tests are skipped until `prepare_metr_la.py` has been run. GitHub Actions runs lint, the Python tests, the OpenAPI schema check and the frontend's type-check, tests and builds on every push and pull request; the end-to-end flows need the data, so they run locally.
 
 ## Roadmap
 
@@ -260,7 +295,7 @@ Real-data tests are skipped until `prepare_metr_la.py` has been run. There is no
 - [x] LightGBM and DCRNN, compared with bootstrap significance
 - [x] FastAPI backend and React dashboard
 - [x] End-to-end tests, a map performance check and a security review
-- [ ] Public demo deployment
+- [x] Public demo on GitHub Pages, CI, v1.0 release
 - [ ] Calibrated prediction intervals
 - [ ] Corridor time-space diagram
 
