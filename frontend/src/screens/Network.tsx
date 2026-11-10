@@ -1,7 +1,9 @@
 // Network: "Where will traffic slow down in the next hour?"
+import { Activity, Gauge, Radio, TriangleAlert } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Block, Empty, Ph } from "../components/Block";
+import { CountUp } from "../components/CountUp";
 import { SensorMap, type MapPoint } from "../components/map/SensorMap";
 import { Segmented } from "../components/Segmented";
 import type { ModelInfo, Sensor } from "../lib/api";
@@ -9,7 +11,7 @@ import { int, plural, speed } from "../lib/format";
 import { comparedWithNow, summarize, type NetworkSummary, type SensorOutlook } from "../lib/network";
 import { useModels, useNetwork, useSensors } from "../lib/queries";
 import { HORIZONS, useReplay, type Horizon } from "../lib/replay";
-import { BANDS } from "../lib/severity";
+import { BANDS, severityRank } from "../lib/severity";
 import { addMinutes, formatClock } from "../lib/time";
 
 const LIST_CAP = 8;
@@ -41,7 +43,7 @@ export function NetworkScreen() {
         <section className="card" aria-labelledby="map-title">
           <div className="card-head">
             <h2 id="map-title">{r.h === 0 ? `Speeds at ${target}` : `Forecast for ${target}`}</h2>
-            <span className="sub">Colour: speed against each sensor’s free flow</span>
+            <ModelNote models={models.data} horizon={r.h} />
           </div>
           <div className="map" style={{ marginTop: 12 }}>
             <Block query={sensors} what="the sensor map" placeholder={<div style={{ height: 480 }} />}>
@@ -62,7 +64,7 @@ export function NetworkScreen() {
       </div>
 
       <Block query={network} what="the network figures" placeholder={<KpiPlaceholder />}>
-        {() => (summary ? <NetworkKpis summary={summary} horizon={r.h} target={target} models={models.data} /> : null)}
+        {() => (summary ? <NetworkKpis summary={summary} horizon={r.h} target={target} /> : null)}
       </Block>
     </>
   );
@@ -151,10 +153,32 @@ function NetworkMap({
         color: b?.color ?? "var(--free-flow)",
         hollow: !b || b.key === "missing",
         tip,
+        details: o
+          ? [
+              [horizon === 0 ? "State now" : `State by ${target}`, b?.label ?? "–"],
+              ["Speed now", o.point.speed_now == null ? "No reading" : `${speed(o.point.speed_now)} mph`],
+              ...(horizon > 0 ? ([[`Forecast, ${target}`, value == null ? "No forecast" : `${speed(value)} mph`]] as const) : []),
+              ["Free-flow speed", `${speed(s.free_flow)} mph`],
+            ]
+          : undefined,
       };
     });
   }, [sensors, summary, horizon, target]);
   return <SensorMap points={points} onSelect={(id) => navigate(r.href(`/sensor/${id}`))} />;
+}
+
+/** The model behind the map and its measured test-period error at this horizon. */
+function ModelNote({ models, horizon }: { models?: ModelInfo[]; horizon: number }) {
+  const r = useReplay();
+  const model = models?.find((m) => m.name === r.model);
+  if (!model) return <span className="sub" />;
+  const mae = horizon > 0 ? model.test_mae[String(horizon) as keyof typeof model.test_mae] : undefined;
+  return (
+    <span className="sub">
+      {model.label}
+      {mae != null && <> · typical error {mae.toFixed(2)} mph at {horizon} min</>} · <Link to={r.href("/models")}>Compare models</Link>
+    </span>
+  );
 }
 
 function Legend() {
@@ -229,54 +253,50 @@ function WatchRow({ o, horizon, target, href }: { o: SensorOutlook; horizon: num
   );
 }
 
-function NetworkKpis({
-  summary,
-  horizon,
-  target,
-  models,
-}: {
-  summary: NetworkSummary;
-  horizon: number;
-  target: string;
-  models?: ModelInfo[];
-}) {
-  const r = useReplay();
-  const model = models?.find((m) => m.name === r.model);
-  const mae = horizon > 0 ? model?.test_mae[String(horizon) as keyof typeof model.test_mae] : undefined;
+function NetworkKpis({ summary, horizon, target }: { summary: NetworkSummary; horizon: number; target: string }) {
+  const slower = summary.sensors.filter((o) => severityRank(o.now) > 0).length;
   return (
-    <section className="kpis" style={{ "--n": 4 } as React.CSSProperties} aria-label="Network figures">
+    <section className="kpis" style={{ "--n": 4 } as React.CSSProperties} aria-label="Network overview">
       <div className="kpi">
-        <div className="kpi-label">Congested now</div>
-        <div className="kpi-value">{int(summary.congestedNow)}</div>
-        <div className="kpi-note">of {int(summary.reporting)} sensors reporting</div>
-      </div>
-      <div className="kpi">
-        <div className="kpi-label">{horizon === 0 ? "Slower than free flow" : `Forecast congested by ${target}`}</div>
-        <div className="kpi-value">{int(horizon === 0 ? summary.watch.length : summary.congestedThen)}</div>
-        <div className="kpi-note">{horizon === 0 ? "slowing or worse" : comparedWithNow(summary.congestedThen, summary.congestedNow)}</div>
-      </div>
-      <div className="kpi">
-        <div className="kpi-label">Sensors reporting</div>
+        <div className="kpi-label">
+          <Radio aria-hidden="true" />
+          Sensors
+        </div>
         <div className="kpi-value">
-          {int(Math.round((summary.reporting / summary.total) * 100))}
-          <span className="unit tight">%</span>
+          <CountUp value={summary.total} />
         </div>
-        <div className="kpi-note">
-          {int(summary.reporting)} of {int(summary.total)} at this moment
-        </div>
+        <div className="kpi-note">on the METR-LA highway network</div>
       </div>
       <div className="kpi">
-        <div className="kpi-label">Model</div>
-        <div className="kpi-value">{model?.label ?? <span className="dash">–</span>}</div>
+        <div className="kpi-label">
+          <TriangleAlert aria-hidden="true" />
+          Congested now
+        </div>
+        <div className="kpi-value">
+          <CountUp value={summary.congestedNow} />
+        </div>
+        <div className="kpi-note">{horizon === 0 ? "below 60% of free-flow speed" : `${int(summary.congestedThen)} forecast by ${target}`}</div>
+      </div>
+      <div className="kpi">
+        <div className="kpi-label">
+          <Gauge aria-hidden="true" />
+          Slower than free flow
+        </div>
+        <div className="kpi-value">
+          <CountUp value={slower} />
+        </div>
+        <div className="kpi-note">slowing or worse, now</div>
+      </div>
+      <div className="kpi">
+        <div className="kpi-label">
+          <Activity aria-hidden="true" />
+          Reporting
+        </div>
+        <div className="kpi-value">
+          <CountUp value={summary.reporting} />
+        </div>
         <div className="kpi-note">
-          {mae != null ? (
-            <>
-              {mae.toFixed(2)} mph typical error at {horizon} min (test period) ·{" "}
-              <Link to={r.href("/models")}>Compare</Link>
-            </>
-          ) : (
-            <Link to={r.href("/models")}>Compare models</Link>
-          )}
+          {int(Math.round((summary.reporting / summary.total) * 100))}% of sensors have a reading now
         </div>
       </div>
     </section>

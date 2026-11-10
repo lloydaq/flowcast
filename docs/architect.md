@@ -188,6 +188,8 @@ Theme: light by default (the dealt style is a light framed sheet); the dark togg
 
 ## 10. Frontend design system
 
+> **Superseded in part on 2026-11-10 (redesign, at the developer's direction).** The palette, typeface and theme rules below were replaced: the app is now navy and warm ivory with one steel-blue data hue and an orange-to-red congestion ramp, set in Inter, with dark / light / system themes (system on first visit). `frontend/src/styles/tokens.css` is the source of truth for every value. So §10.1's ban on navy themes, the §10.3 colour tokens and the IBM Plex Sans choice in §10.4 no longer apply. Still in force: pill controls, concentric radii, the chart rules (§10.7), the screen states (§10.8), the motion rules (§10.9) and the accessibility rules (§10.10). Added in the redesign: a Sensors ranking screen, a Settings screen, a marker popup on the map, a sliding navigation indicator, staggered page entrances and route-level code splitting.
+
 ### 10.1 What it must not look like
 
 The default generated dashboard: a navy sidebar with a glowing active pill, "Welcome back 👋", four KPI cards each with an icon in a tinted circle and a green "+12.5%", a gradient area chart with a smoothed line, neon accents on near-black, glass panels and shimmering skeletons. Every one of those is **banned** here:

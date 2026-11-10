@@ -667,11 +667,12 @@ table.data caption {
 }
 /* OpenStreetMap tiles made grey: the basemap carries no hue, so all colour is data (§10.2) */
 .map .leaflet-tile-pane {
-  filter: grayscale(1) contrast(0.82) brightness(1.06);
+  filter: grayscale(1) contrast(0.82) brightness(1.05) sepia(0.14);
   opacity: 0.85;
+  transition: filter var(--t-fill) ease;
 }
 :root[data-theme="dark"] .map .leaflet-tile-pane {
-  filter: grayscale(1) invert(1) contrast(0.7) brightness(0.95);
+  filter: grayscale(1) invert(1) contrast(0.68) brightness(0.9) sepia(0.45) hue-rotate(178deg) saturate(1.5);
   opacity: 1;
 }
 .map .leaflet-interactive {
@@ -1050,4 +1051,276 @@ details.as-table .table-scroll {
   .btn:active {
     transform: none;
   }
+}
+
+/* ================= redesign layer: navigation, motion, popups, ranking, settings ================= */
+
+/* theme switch: colours cross-fade for one beat (the class is added by lib/theme.ts) */
+.theme-switching,
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: background-color 300ms ease, color 300ms ease, border-color 300ms ease, fill 300ms ease,
+    stroke 300ms ease !important;
+}
+
+/* sidebar: one indicator slides to the active item */
+.nav {
+  position: relative;
+}
+.nav li {
+  position: relative;
+}
+.nav .nav-indicator {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 32px;
+  border-radius: var(--r-pill);
+  background: var(--active);
+  transition: transform var(--t-ui) var(--ease-out);
+}
+.nav a[aria-current="page"],
+.nav a[aria-current="page"]:hover {
+  background: transparent;
+}
+.status-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--positive);
+  vertical-align: 2px;
+}
+.theme-toggle {
+  flex: none;
+}
+.icon-swap {
+  display: inline-flex;
+  animation: icon-swap var(--t-ui) var(--ease-out) both;
+}
+@keyframes icon-swap {
+  from {
+    opacity: 0;
+    transform: rotate(-40deg) scale(0.8);
+  }
+}
+
+/* page entrance: blocks rise in, staggered, once per route */
+main.enter > * {
+  animation: rise var(--t-enter) var(--ease-out) both;
+}
+main.enter > :nth-child(2) {
+  animation-delay: 60ms;
+}
+main.enter > :nth-child(3) {
+  animation-delay: 120ms;
+}
+main.enter > :nth-child(n + 4) {
+  animation-delay: 180ms;
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+.card {
+  transition: border-color var(--t-hover) ease;
+}
+.card:hover {
+  border-color: var(--control);
+}
+.kpi-label svg {
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  vertical-align: -2px;
+  stroke-width: 1.5;
+}
+
+/* map: markers fade in in six waves; the selection ring settles in once */
+.map .fc-marker {
+  animation: marker-in 360ms ease-out both;
+}
+.map .fc-d1 { animation-delay: 40ms; }
+.map .fc-d2 { animation-delay: 80ms; }
+.map .fc-d3 { animation-delay: 120ms; }
+.map .fc-d4 { animation-delay: 160ms; }
+.map .fc-d5 { animation-delay: 200ms; }
+@keyframes marker-in {
+  from {
+    opacity: 0;
+  }
+}
+.map .fc-selected {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ring-in 420ms var(--ease-out) both;
+}
+@keyframes ring-in {
+  from {
+    opacity: 0;
+    transform: scale(1.7);
+  }
+}
+.map .fc-popup .leaflet-popup-content-wrapper {
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--r-inner);
+  box-shadow: var(--float-shadow);
+}
+.map .fc-popup .leaflet-popup-tip {
+  background: var(--surface);
+  box-shadow: none;
+}
+.map .fc-popup .leaflet-popup-content {
+  margin: 14px 16px;
+  min-width: 190px;
+  font: 400 var(--fs-small) / 16px var(--font);
+}
+.popup-title {
+  font-size: var(--fs-body);
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.fc-popup dl {
+  margin: 0 0 12px;
+}
+.fc-popup dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 4px 0;
+}
+.fc-popup dl div + div {
+  border-top: 1px solid var(--rule);
+}
+.fc-popup dt {
+  color: var(--muted);
+}
+.fc-popup dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+.fc-popup .btn {
+  width: 100%;
+  --control-h: 30px;
+}
+
+/* sensor ranking */
+.search.inline {
+  margin-left: 0;
+}
+.search.inline input {
+  width: 150px;
+}
+.table-scroll.tall {
+  max-height: 640px;
+  overflow: auto;
+  padding-top: 8px;
+}
+table.data.sticky thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface);
+  padding-top: 8px;
+}
+.sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: color var(--t-hover) ease;
+}
+.sort:hover,
+th[aria-sort="ascending"] .sort,
+th[aria-sort="descending"] .sort {
+  color: var(--text);
+}
+.sort svg {
+  width: 12px;
+  height: 12px;
+}
+.state {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.row-id {
+  text-decoration: none;
+}
+.row-id:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+table.data tbody tr {
+  transition: background-color var(--t-hover) ease;
+}
+table.data.sticky tbody tr:hover {
+  background: var(--raised);
+}
+
+/* settings */
+.setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 32px;
+  flex-wrap: wrap;
+  padding: 20px;
+}
+.setting + .setting {
+  border-top: 1px solid var(--rule);
+}
+.setting h2 {
+  font-size: var(--fs-body);
+  line-height: 20px;
+  font-weight: 600;
+}
+.setting p {
+  max-width: 52ch;
+}
+
+@media (max-width: 640px) {
+  .topbar .theme-toggle {
+    margin-left: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main.enter > *,
+  .map .fc-marker,
+  .map .fc-selected,
+  .icon-swap {
+    animation: none;
+  }
+  .nav .nav-indicator,
+  .map .leaflet-tile-pane {
+    transition: none;
+  }
+}
+
+/* row headers read at body size; the ranking's first two columns stay narrow */
+table.data tbody th {
+  font-size: var(--fs-body);
+  color: var(--text);
+}
+table.data.sticky th:first-child,
+table.data.sticky td:first-child {
+  width: 72px;
+}
+table.data.sticky th:nth-child(2) {
+  width: 140px;
+}
+
+/* a clicked marker shows its popup, not a focus box */
+.map path.leaflet-interactive:focus {
+  outline: none;
 }
