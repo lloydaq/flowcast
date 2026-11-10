@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import react from "@vitejs/plugin-react";
 import type { Plugin } from "vite";
@@ -43,7 +43,8 @@ function pagesBuild(): Plugin {
       writeFileSync(file, html.replace("<head>", `<head>\n    <meta http-equiv="Content-Security-Policy" content="${csp}" />`));
       copyFileSync(file, join(outDir, "404.html")); // unknown paths: the app's own "Page not found"
       // every real route gets its own copy, so deep links load with HTTP 200, not GitHub's 404 fallback
-      const sensors = JSON.parse(readFileSync(join(outDir, "data", "grid.json"), "utf-8")).sensor_ids as string[];
+      const grid = join(outDir, "data", "grid.json");
+      const sensors = existsSync(grid) ? (JSON.parse(readFileSync(grid, "utf-8")).sensor_ids as string[]) : [];
       for (const route of ["sensors", "models", "patterns", "settings", ...sensors.map((id) => `sensor/${id}`)]) {
         mkdirSync(join(outDir, route), { recursive: true });
         copyFileSync(file, join(outDir, route, "index.html"));
