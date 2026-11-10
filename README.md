@@ -175,13 +175,14 @@ src/flowcast/
   evaluation/    masked metrics, shared evaluation rows, results loader
   api/           FastAPI app, in-memory forecast store, response schemas
 scripts/         one script per pipeline step (prepare, features, train, compare, benchmark)
-tests/           91 tests: synthetic unit tests and real-data integration tests
+tests/           122 tests: unit, real-data integration and API security tests
 frontend/
   src/screens/     Network, Sensors, Sensor, Models, Patterns, Settings
   src/components/  shell, map, charts, controls
   src/lib/         API client, replay state, severity bands, formatting, theme
   src/styles/      tokens.css (design tokens), app.css
-docs/            dataset, EDA, features, experiments, model cards, architecture
+  e2e/             Playwright flows and the map performance check
+docs/            dataset, EDA, features, experiments, model cards, architecture, security review
 models/metrics/  committed evaluation results (JSON)
 ```
 
@@ -238,13 +239,17 @@ Invalid input returns 422 with a reason; an unknown sensor returns 404. Measured
 ## Testing
 
 ```powershell
-pytest                    # 91 tests
+pytest                    # 122 tests, including 31 security checks on the API
 ruff check . ; ruff format --check .
 cd frontend
 npm test                  # 10 unit tests
 npm run typecheck
+npm run e2e               # 21 Playwright flows against the real API (desktop and phone)
+npm run e2e:perf          # map performance -> models/metrics/frontend_perf.json
 node scripts/screenshots.mjs   # recaptures the README screenshots; fails on console errors or overflow
 ```
+
+The end-to-end tests use your installed Chrome and start the API and the production build if they are not running. On this laptop a replay step redraws all 207 markers in 34 ms at p95 (128 ms with the CPU slowed 4×). The security review and how to re-run it are in [docs/security.md](docs/security.md).
 
 Real-data tests are skipped until `prepare_metr_la.py` has been run. There is no hosted CI yet.
 
@@ -254,7 +259,7 @@ Real-data tests are skipped until `prepare_metr_la.py` has been run. There is no
 - [x] Leakage-tested features, baselines and the evaluation framework
 - [x] LightGBM and DCRNN, compared with bootstrap significance
 - [x] FastAPI backend and React dashboard
-- [ ] End-to-end tests and a security review
+- [x] End-to-end tests, a map performance check and a security review
 - [ ] Public demo deployment
 - [ ] Calibrated prediction intervals
 - [ ] Corridor time-space diagram

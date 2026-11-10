@@ -59,6 +59,14 @@ def create_app(store: ForecastStore | None = None) -> FastAPI:
     ]
     app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET"], allow_headers=["*"])
 
+    @app.middleware("http")
+    async def security_headers(request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"  # JSON is never sniffed as HTML
+        response.headers["Referrer-Policy"] = "no-referrer"
+        response.headers["X-Frame-Options"] = "DENY"  # nothing here is meant to be framed
+        return response
+
     @app.exception_handler(SensorNotFoundError)
     async def sensor_not_found(request: Request, exc: SensorNotFoundError) -> JSONResponse:
         return JSONResponse({"detail": str(exc)}, status_code=404)

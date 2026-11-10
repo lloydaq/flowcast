@@ -1097,7 +1097,7 @@ details.as-table .table-scroll {
 }
 .icon-swap {
   display: inline-flex;
-  animation: icon-swap var(--t-ui) var(--ease-out) both;
+  animation: icon-swap var(--t-ui) var(--ease-out) backwards;
 }
 @keyframes icon-swap {
   from {
@@ -1108,7 +1108,7 @@ details.as-table .table-scroll {
 
 /* page entrance: blocks rise in, staggered, once per route */
 main.enter > * {
-  animation: rise var(--t-enter) var(--ease-out) both;
+  animation: rise var(--t-enter) var(--ease-out) backwards;
 }
 main.enter > :nth-child(2) {
   animation-delay: 60ms;
@@ -1141,7 +1141,7 @@ main.enter > :nth-child(n + 4) {
 
 /* map: markers fade in in six waves; the selection ring settles in once */
 .map .fc-marker {
-  animation: marker-in 360ms ease-out both;
+  animation: marker-in 360ms ease-out backwards;
 }
 .map .fc-d1 { animation-delay: 40ms; }
 .map .fc-d2 { animation-delay: 80ms; }
@@ -1156,7 +1156,7 @@ main.enter > :nth-child(n + 4) {
 .map .fc-selected {
   transform-box: fill-box;
   transform-origin: center;
-  animation: ring-in 420ms var(--ease-out) both;
+  animation: ring-in 420ms var(--ease-out) backwards;
 }
 @keyframes ring-in {
   from {

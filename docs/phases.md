@@ -15,8 +15,8 @@ Related: [architect.md](architect.md) · [memory.md](memory.md)
 | 6 | Graph deep learning (DCRNN) | ✅ done | see git log |
 | 7 | Backend (FastAPI) | ✅ done | see git log |
 | 8 | Frontend (React) | ✅ done | see git log |
-| 9 | Integration and testing | ⏭ next | |
-| 10 | Deployment and open-source release | planned | |
+| 9 | Integration and testing | ✅ done | see git log |
+| 10 | Deployment and open-source release | ⏭ next | |
 
 ---
 
@@ -136,7 +136,9 @@ Result: four screens (Network, Sensor, Models, Patterns) on the framed sheet, wi
 - Screens: Network, Sensor, Models, Patterns. Stretch goal: the corridor time-space diagram.
 - **Exit:** the taste-skill inspector in app mode at 1440 / 768 / 390 with no FAILs; reduced-motion checked; Lighthouse accessibility ≥ 95.
 
-## Phase 9 — Integration and testing
+## Phase 9 — Integration and testing ✅
+
+Result: 21 Playwright flows against the real API and production build (desktop and phone), including error, empty and invalid-URL states; a map performance check (a replay step redraws all 207 markers in 34 ms at p95, 128 ms with the CPU slowed 4×; [frontend_perf.json](../models/metrics/frontend_perf.json)); and a security review with 31 new API tests ([security.md](security.md)). Fixed on the way: echoed input is now cut short, the API sends `nosniff` / `no-referrer` / `DENY` framing headers, entrance animations no longer leave 207 finished animations on the map, and the virtual environment's `setuptools` was upgraded past three advisories.
 
 - End-to-end flows (Playwright), error and empty states against a real backend, a performance check on the 207-marker map, and a security review (CORS, input validation, no filesystem exposure).
 
