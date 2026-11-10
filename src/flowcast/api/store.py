@@ -41,6 +41,11 @@ class InvalidQueryError(ValueError):
     """An invalid query value: as-of time, horizon or model (the API maps it to 422)."""
 
 
+def _echo(value: str, limit: int = 40) -> str:
+    """User input quoted back in an error message, cut short so a huge input is not reflected whole."""
+    return repr(value if len(value) <= limit else value[:limit] + "…")
+
+
 def _num(x: float) -> float | None:
     """JSON-safe value: NaN (missing reading / no forecast) becomes null; 2 decimals is 0.01 mph."""
     return None if np.isnan(x) else round(float(x), 2)
@@ -118,14 +123,14 @@ class ForecastStore:
         if name is None:
             return next(m for m in MODELS if m in self.forecast)
         if name not in self.forecast:
-            raise InvalidQueryError(f"unknown model {name!r}; expected one of {sorted(self.forecast)}")
+            raise InvalidQueryError(f"unknown model {_echo(name)}; expected one of {sorted(self.forecast)}")
         return name
 
     def node(self, sensor_id: str) -> int:
         try:
             return self.node_of[sensor_id]
         except KeyError:
-            raise SensorNotFoundError(f"unknown sensor {sensor_id!r}") from None
+            raise SensorNotFoundError(f"unknown sensor {_echo(sensor_id)}") from None
 
     def replay_row(self, as_of: pd.Timestamp) -> int:
         if as_of.tzinfo is not None:
@@ -226,7 +231,7 @@ class ForecastStore:
         """Every sensor's masked MAE for one evaluated model, split and horizon; worst first."""
         if model not in self.results:
             raise InvalidQueryError(
-                f"unknown evaluated model {model!r}; expected one of {list(self.results)}"
+                f"unknown evaluated model {_echo(model)}; expected one of {list(self.results)}"
             )
         if split not in ("validation", "test"):
             raise InvalidQueryError("split must be 'validation' or 'test'")

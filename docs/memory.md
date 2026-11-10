@@ -65,6 +65,8 @@ Last updated: 2026-11-08 (Phase 5 complete). Current state: Phase 6 (graph deep 
 | 2026-11-10 | Redesign: navy + ivory palette, Inter, dark / light / system themes; `tokens.css` is the source of truth (architect.md §10 colours superseded) | Developer's new visual direction |
 | 2026-11-10 | Sidebar lists only screens with real data (Network, Sensors, Models, Patterns, Settings) | No Dashboard / Analytics / Experiments / Reports pages exist; nothing is faked |
 | 2026-11-10 | README images are theme-aware `<picture>` pairs; screenshots come from `frontend/scripts/screenshots.mjs` | Real captures in both themes; the script also fails on console errors or overflow |
+| 2026-11-10 | E2E with Playwright on the installed Chrome (`channel: "chrome"`), one worker, servers reused if running | No browser download; one API process; quiet perf numbers |
+| 2026-11-10 | Security headers set by the API itself; CSP, HSTS and rate limiting left to the Phase 10 host | The API serves JSON only; the frontend's host decides its own headers |
 
 ## Conventions
 
@@ -88,7 +90,8 @@ python scripts/train_dcrnn.py       # DCRNN on GPU, ~134 s/epoch, 100 epochs (~3
 python scripts/compare_models.py    # docs/model_comparison.md + models/metrics/comparison.json
 uvicorn flowcast.api.app:app        # API (store loads in ~1 s); docs at /docs
 python scripts/benchmark_api.py     # latency over HTTP -> models/metrics/api_latency.json
-pytest                              # 91 tests at end of Phase 8
+pytest                              # 122 tests at end of Phase 9
+cd frontend; npm run e2e            # 21 Playwright flows; npm run e2e:perf for the map timings
 cd frontend; npm run dev            # dashboard on :5173 (needs the API on :8000); npm test, npm run typecheck
 ruff check . ; ruff format --check .
 ```
@@ -113,4 +116,6 @@ ruff check . ; ruff format --check .
 - `vite preview` binds to `localhost` (IPv6), not 127.0.0.1: point tools at http://localhost:4173.
 - CARTO basemap tiles now answer "API key required"; the map uses greyscale OSM tiles.
 - After any API schema change run `python scripts/export_openapi.py`, then `npm run api:types` in frontend/.
+- Entrance animations use `animation-fill-mode: backwards`, not `both`: `both` keeps a finished animation on each of the 207 markers, which Playwright reads as never stable.
+- Map markers overlap on dense stretches: click them by position in tests.
 - Validation contains Memorial Day (Mon 2012-05-28). Training has no US federal holidays.

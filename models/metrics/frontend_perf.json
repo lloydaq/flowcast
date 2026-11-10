@@ -1,0 +1,38 @@
+{
+ "setup": "Production build, headless Chrome (Playwright), 1440x900, real API on localhost; development laptop (Ryzen 7 7840HS). Indicative only: one run, headless rendering, and map tiles from the network.",
+ "markers": 207,
+ "load_to_markers_ms": {
+  "runs": [
+   334,
+   166,
+   187
+  ],
+  "median": 187
+ },
+ "replay_step_ms": {
+  "cpu": "normal",
+  "runs": 12,
+  "p50": 19.8,
+  "p95": 33.8
+ },
+ "playing_frames": {
+  "cpu": "normal",
+  "frames": 851,
+  "p50_ms": 6.9,
+  "p95_ms": 7.1,
+  "longest_ms": 28,
+  "frames_over_50ms": 0
+ },
+ "replay_step_ms_cpu_4x_slower": {
+  "runs": 12,
+  "p50": 83.4,
+  "p95": 128
+ },
+ "playing_frames_cpu_4x_slower": {
+  "frames": 794,
+  "p50_ms": 6.9,
+  "p95_ms": 7.1,
+  "longest_ms": 63,
+  "frames_over_50ms": 2
+ }
+}
