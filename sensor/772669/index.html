@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-gIDZhDkGuRnrl8vtmsNDYuobAsY+duaUFuJJd/siYBg='; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://tile.openstreetmap.org; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="FlowCast: traffic speed forecasts for 207 Los Angeles highway sensors, replayed against what actually happened." />
+    <link rel="icon" type="image/svg+xml" href="/flowcast/favicon.svg" />
+    <title>FlowCast</title>
+    <script>
+      // Set the theme before the first paint (same rule as src/lib/theme.ts): no flash of the wrong theme.
+      (function () {
+        var t = new URLSearchParams(location.search).get("theme");
+        if (t !== "dark" && t !== "light") {
+          try {
+            t = localStorage.getItem("flowcast-theme");
+          } catch (e) {}
+        }
+        if (t !== "dark" && t !== "light") t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <style>html{background:#f6f4ef}html[data-theme=dark]{background:#0a111f}</style>
+    <script type="module" crossorigin src="/flowcast/assets/index-BXLUYXFi.js"></script>
+    <link rel="modulepreload" crossorigin href="/flowcast/assets/replay-DRv0YTmf.js">
+    <link rel="stylesheet" crossorigin href="/flowcast/assets/index-BK4_Ec2J.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

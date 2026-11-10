@@ -1,0 +1,1 @@
+{"status":"ok","models":["dcrnn","lightgbm"],"default_model":"dcrnn","replay_start":"2012-06-04T04:10:00","replay_end":"2012-06-27T22:55:00","step_min":5,"horizons_min":[15,30,45,60],"sensors":207}

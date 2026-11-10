@@ -1,0 +1,1 @@
+[{"name":"dcrnn","label":"DCRNN","description":"Graph recurrent network over the road graph; lowest MAE up to 45 min","default":true,"test_mae":{"15":2.635,"30":3.022,"45":3.282,"60":3.473}},{"name":"lightgbm","label":"LightGBM","description":"Gradient-boosted trees, one model per horizon","default":false,"test_mae":{"15":2.713,"30":3.101,"45":3.336,"60":3.489}}]
