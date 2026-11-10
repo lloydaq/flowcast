@@ -36,6 +36,7 @@ test.describe("Network", () => {
 
   test("a marker opens its details, then the sensor's forecast", async ({ page }) => {
     await page.goto(`./?${AT}`);
+    await expect(page.locator(".finding")).toContainText("forecast congested"); // the forecast has loaded
     // markers overlap on dense stretches: click where a user would, and accept whichever marker is on top
     const box = await page.locator(".map path.fc-marker").nth(40).boundingBox();
     if (!box) throw new Error("marker not rendered");
@@ -49,7 +50,7 @@ test.describe("Network", () => {
 
   test("the slowing list links to a sensor and keeps the replay state", async ({ page }) => {
     await page.goto(`./?${AT}`);
-    await page.locator(".rows .row-link").first().click();
+    await page.locator("a.row-link").first().click(); // a real row, not a loading placeholder
     await expect(page).toHaveURL(/\/sensor\/773939\?t=2012-06-12T16%3A30&h=30/);
   });
 });

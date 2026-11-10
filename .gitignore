@@ -24,3 +24,6 @@ Thumbs.db
 
 # Local design-tool working files
 .taste-skill/
+
+# /brag launch-video work files
+brag-output*/work/
