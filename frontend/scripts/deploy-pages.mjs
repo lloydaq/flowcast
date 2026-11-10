@@ -13,7 +13,9 @@ import { fileURLToPath } from "node:url";
 
 const FRONTEND = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DIST = join(FRONTEND, "dist-static");
-const run = (cmd, args, cwd = FRONTEND) => execFileSync(cmd, args, { cwd, stdio: "inherit", shell: process.platform === "win32" });
+// npm is a .cmd file on Windows and needs a shell; git must not have one (it would split the message)
+const run = (cmd, args, cwd = FRONTEND) =>
+  execFileSync(cmd, args, { cwd, stdio: "inherit", shell: cmd === "npm" && process.platform === "win32" });
 const out = (cmd, args, cwd = FRONTEND) => execFileSync(cmd, args, { cwd, encoding: "utf-8" }).trim();
 
 if (!existsSync(join(FRONTEND, ".static", "data", "grid.json")))
@@ -30,4 +32,4 @@ run("git", ["add", "-A"], DIST);
 run("git", ["commit", "-q", "-m", `Deploy the FlowCast demo from ${source}${dirty ? " (with uncommitted changes)" : ""}`], DIST);
 run("git", ["push", "--force", "-q", remote, "gh-pages"], DIST);
 rmSync(join(DIST, ".git"), { recursive: true, force: true });
-console.log(`Deployed ${source} to gh-pages. Live at https://<user>.github.io/flowcast/ once Pages serves that branch.`);
+console.log(`Deployed ${source} to gh-pages. Live at https://lloydaq.github.io/flowcast/ once Pages serves that branch.`);
