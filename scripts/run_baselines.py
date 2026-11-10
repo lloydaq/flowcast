@@ -14,17 +14,15 @@ import json
 import time
 
 import numpy as np
-import pandas as pd
-import pyarrow.parquet as pq
 
 from flowcast import paths
-from flowcast.data.metr_la import FREQ
 from flowcast.data.processed import load_speed, owned_period
-from flowcast.evaluation.metrics import MAPE_MIN_SPEED, PEAK_HOURS, evaluate
-from flowcast.features.build import HORIZONS, row_times, target_column
+from flowcast.evaluation.metrics import MAPE_MIN_SPEED, PEAK_HOURS
+from flowcast.evaluation.rows import load_eval_rows
+from flowcast.features.build import HORIZONS, row_times
 from flowcast.models.baselines import ARResidual, HistoricalAverage, Persistence, SeasonalNaive
+from flowcast.reporting import print_report
 
-FEATURES_DIR = paths.PROCESSED_DIR / "features"
 METRICS_PATH = paths.PROJECT_ROOT / "models" / "metrics" / "baselines.json"
 REPORT_PATH = paths.PROJECT_ROOT / "docs" / "baseline_results.md"
 SPLITS = ("validation", "test")
@@ -43,37 +41,19 @@ def main() -> None:
         ARResidual(ha).fit(speed, train_times, HORIZONS),
     ]
 
-    rows = {}
-    for split in SPLITS:
-        cols = ["timestamp", "node_id", "free_flow", *(target_column(h) for h in HORIZONS)]
-        df = pq.read_table(FEATURES_DIR / f"{split}.parquet", columns=cols).to_pandas()
-        t_idx = speed.index.get_indexer(pd.DatetimeIndex(df["timestamp"]))
-        node = df["node_id"].to_numpy()
-        if (t_idx < 0).any():
-            raise ValueError(f"{split}: timestamps outside the canonical grid")
-        rows[split] = (df, t_idx, node)
-
+    rows = {split: load_eval_rows(split, speed) for split in SPLITS}
     results: dict = {name: {} for name in SPLITS}
     for model in models:
         for h in HORIZONS:
             pred = model.predict(speed, h)
             fallback = model.fallback_mask(speed, h) if hasattr(model, "fallback_mask") else None
-            for split, (df, t_idx, node) in rows.items():
-                y = df[target_column(h)].to_numpy(np.float64)
-                # the feature table's target must be the canonical reading at t + h
-                np.testing.assert_allclose(y, speed.to_numpy()[t_idx + h, node], atol=1e-4, equal_nan=True)
-                r = evaluate(
-                    y,
-                    pred[t_idx, node],
-                    pd.DatetimeIndex(df["timestamp"]) + h * FREQ,
-                    node,
-                    df["free_flow"].to_numpy(np.float64),
+            for split, r in rows.items():
+                scores = r.score(pred, h)
+                has = ~np.isnan(r.target(h))
+                scores["fallback_pct"] = (
+                    0.0 if fallback is None else float(fallback[r.t_idx, r.node][has].mean() * 100)
                 )
-                has = ~np.isnan(y)
-                r["fallback_pct"] = (
-                    0.0 if fallback is None else float(fallback[t_idx, node][has].mean() * 100)
-                )
-                results[split].setdefault(model.name, {})[f"h{h}"] = r
+                results[split].setdefault(model.name, {})[f"h{h}"] = scores
 
     payload = {
         "definitions": {
@@ -90,7 +70,7 @@ def main() -> None:
     METRICS_PATH.parent.mkdir(parents=True, exist_ok=True)
     METRICS_PATH.write_text(json.dumps(payload, indent=1), encoding="utf-8")
     REPORT_PATH.write_text(render(results), encoding="utf-8")
-    print(REPORT_PATH.read_text(encoding="utf-8"))
+    print_report(REPORT_PATH)
     print(f"runtime {payload['runtime_s']} s")
 
 

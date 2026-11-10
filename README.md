@@ -11,7 +11,7 @@
 | 3 | Feature engineering ([features](docs/features.md)) | ✅ done |
 | 4 | Baselines and evaluation ([results](docs/baseline_results.md), [experiments](docs/experiments.md)) | ✅ done |
 | 5 | LightGBM ([model card](docs/model_card_lightgbm.md)) | ✅ done |
-| 6 | Graph deep learning | next |
+| 6 | Graph deep learning ([DCRNN card](docs/model_card_dcrnn.md), [comparison](docs/model_comparison.md)) | ✅ done |
 | 7–10 | FastAPI backend, React dashboard, integration, release | planned |
 
 ## Setup (Windows / PowerShell)
@@ -29,6 +29,9 @@ python scripts/build_features.py    # point-in-time feature tables -> data/proce
 python scripts/run_baselines.py     # baseline scores -> models/metrics/baselines.json, docs/baseline_results.md
 python scripts/tune_lightgbm.py     # LightGBM search on validation (~35 min)
 python scripts/train_lightgbm.py    # final LightGBM models + model card (~60 min, CPU)
+pip install torch --index-url https://download.pytorch.org/whl/cu126   # CUDA PyTorch, once
+python scripts/train_dcrnn.py       # DCRNN on the GPU + model card (~3.7 h; --resume after a crash)
+python scripts/compare_models.py    # side-by-side table + significance -> docs/model_comparison.md
 pytest                              # unit tests + data integration tests
 ruff check .
 ```
@@ -48,6 +51,9 @@ src/flowcast/features/build.py    point-in-time features and targets (leakage-te
 src/flowcast/evaluation/metrics.py masked MAE / RMSE / MAPE and slices (peak, congested, hour, sensor)
 src/flowcast/models/baselines.py  persistence, historical average, seasonal naive, AR on residuals
 src/flowcast/models/lgbm.py       LightGBM loading, training, group permutation importance
+src/flowcast/models/dcrnn.py      DCRNN (diffusion convolution GRU encoder-decoder) and its data windows
+src/flowcast/evaluation/rows.py   the shared evaluation rows every model is scored on
+src/flowcast/reporting.py         figure style, git commit, memory and report-printing helpers
 src/flowcast/analysis/eda.py      EDA statistics (congestion, profiles, autocorrelation, spatial)
 scripts/run_eda.py                EDA figures and summary (training period only)
 docs/dataset.md                   verified dataset documentation
@@ -55,6 +61,8 @@ docs/eda.md                       EDA report
 docs/features.md                  feature definitions, leakage guarantees, table sizes
 docs/experiments.md               experiment log: baselines, LightGBM search and results
 docs/model_card_lightgbm.md       LightGBM model card (generated)
+docs/model_card_dcrnn.md          DCRNN model card (generated)
+docs/model_comparison.md          all models side by side, with bootstrap significance (generated)
 docs/phases.md                    roadmap, status and exit criteria per phase
 docs/architect.md                 system architecture and frontend design system
 docs/memory.md                    verified facts, decisions log, conventions (read first)

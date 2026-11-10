@@ -1,0 +1,80 @@
+{
+ "mae_gap_dcrnn_minus_lightgbm": {
+  "validation": {
+   "h3": {
+    "mae_gap": -0.0878,
+    "ci95": [
+     -0.1217,
+     -0.0522
+    ],
+    "days": 13,
+    "days_dcrnn_better": 11
+   },
+   "h6": {
+    "mae_gap": -0.122,
+    "ci95": [
+     -0.1888,
+     -0.0614
+    ],
+    "days": 13,
+    "days_dcrnn_better": 10
+   },
+   "h9": {
+    "mae_gap": -0.1442,
+    "ci95": [
+     -0.2842,
+     -0.0292
+    ],
+    "days": 13,
+    "days_dcrnn_better": 9
+   },
+   "h12": {
+    "mae_gap": -0.1416,
+    "ci95": [
+     -0.3536,
+     0.0128
+    ],
+    "days": 13,
+    "days_dcrnn_better": 8
+   }
+  },
+  "test": {
+   "h3": {
+    "mae_gap": -0.0783,
+    "ci95": [
+     -0.1007,
+     -0.0582
+    ],
+    "days": 24,
+    "days_dcrnn_better": 24
+   },
+   "h6": {
+    "mae_gap": -0.0789,
+    "ci95": [
+     -0.1227,
+     -0.0421
+    ],
+    "days": 24,
+    "days_dcrnn_better": 20
+   },
+   "h9": {
+    "mae_gap": -0.0547,
+    "ci95": [
+     -0.1193,
+     -0.0059
+    ],
+    "days": 24,
+    "days_dcrnn_better": 15
+   },
+   "h12": {
+    "mae_gap": -0.016,
+    "ci95": [
+     -0.0872,
+     0.0453
+    ],
+    "days": 24,
+    "days_dcrnn_better": 12
+   }
+  }
+ }
+}

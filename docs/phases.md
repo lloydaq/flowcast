@@ -12,8 +12,8 @@ Related: [architect.md](architect.md) · [memory.md](memory.md)
 | 3 | Feature engineering | ✅ done | `ea342c8` |
 | 4 | Baselines and evaluation framework | ✅ done | see git log |
 | 5 | LightGBM | ✅ done | see git log |
-| 6 | Graph deep learning (DCRNN) | ⏭ next | |
-| 7 | Backend (FastAPI) | planned | |
+| 6 | Graph deep learning (DCRNN) | ✅ done | see git log |
+| 7 | Backend (FastAPI) | ⏭ next | |
 | 8 | Frontend (React) | planned | |
 | 9 | Integration and testing | planned | |
 | 10 | Deployment and open-source release | planned | |
@@ -108,7 +108,10 @@ Result: beats the floor at every horizon (validation MAE 2.53–3.36 vs 3.15–3
 - Model serialisation and a model card (data period, features, metrics, git commit).
 - **Exit:** it beats every baseline on validation at all horizons, or the doc says honestly where it doesn't.
 
-## Phase 6 — Graph deep learning
+## Phase 6 — Graph deep learning ✅
+
+Result: lowest MAE at every horizon (validation 2.44–3.22, test 2.64–3.47); significantly better than LightGBM up to 45 min, tied at 60 min, and worse on long-horizon RMSE. See [experiments.md](experiments.md) §4, the [comparison](model_comparison.md) and the [model card](model_card_dcrnn.md).
+
 
 - DCRNN on the published directed adjacency (no invented connectivity). Batch size and hidden size sized for 6 GB VRAM, with mixed precision.
 - Same splits, same masked metrics, same test period as LightGBM.

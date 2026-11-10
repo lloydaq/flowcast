@@ -53,6 +53,10 @@ Last updated: 2026-11-08 (Phase 5 complete). Current state: Phase 6 (graph deep 
 | 2026-11-08 | LightGBM: one direct global model per horizon; L1 objective, 127 leaves, min leaf 500, lr 0.05 | L1 beat every L2 config by ~7% MAE (RMSE ~3–4% worse, still below floor); stacked model was within ~1.6% and needs 4× memory |
 | 2026-11-08 | LightGBM checkpoints in `models/checkpoints/lightgbm/` (git-ignored, ~140 MB); predictions in `data/processed/predictions/` | Reproducible from `scripts/train_lightgbm.py` (~60 min) |
 | 2026-11-08 | Prediction intervals deferred | Optional in Phase 5; need their own calibration check |
+| 2026-11-10 | DCRNN with published settings (hidden 64, 2 layers, 2 diffusion steps, lr 0.01 stepped, scheduled sampling), fp16 autocast, batch 64; one model for 12 steps | Fits 6 GB VRAM (1.8 GB peak); no tuning budget at ~3.7 h per run |
+| 2026-11-10 | All models scored through `flowcast/evaluation/rows.py` (same rows, same masked metrics) | A comparison is only fair on identical rows |
+| 2026-11-10 | Model differences judged by a 95% day-block bootstrap of the MAE gap; claimed only if the interval excludes 0 | Errors within a day are correlated; one seed cannot show significance by itself |
+| 2026-11-10 | DCRNN checkpoint in `models/checkpoints/dcrnn/` (`model.pt` best weights, `last.pt` resumable state; git-ignored) | Training saves every epoch, so a kill loses at most one epoch |
 | *open* | PostgreSQL vs Parquet-only backend | Decide before Phase 7 ([architect.md](architect.md) §6) |
 
 ## Conventions
@@ -73,7 +77,9 @@ python scripts/build_features.py    # data/processed/features/{split}.parquet (~
 python scripts/run_baselines.py     # models/metrics/baselines.json + docs/baseline_results.md (~23 s)
 python scripts/tune_lightgbm.py     # validation-only search -> models/metrics/lightgbm_search.json (~35 min)
 python scripts/train_lightgbm.py    # final models, test scored once, model card + figures (~60 min)
-pytest                              # 59 tests at end of Phase 5
+python scripts/train_dcrnn.py       # DCRNN on GPU, ~134 s/epoch, 100 epochs (~3.7 h); --resume continues
+python scripts/compare_models.py    # docs/model_comparison.md + models/metrics/comparison.json
+pytest                              # 66 tests at end of Phase 6
 ruff check . ; ruff format --check .
 ```
 
@@ -89,4 +95,7 @@ ruff check . ; ruff format --check .
 - Always pass `encoding="utf-8"` to `read_text`/`write_text`: Windows defaults to cp1252 and fails on `→`/`✅` (it once emptied README.md and once crashed the model-card write after a 60-min run).
 - Use `.venv/Scripts/python`, not bare `python` (the system Python is 3.14 / a Store stub).
 - psutil `rss` is current memory, not peak; on Windows use `memory_info().peak_wset`.
+- Print generated reports with `reporting.print_report`: a plain `print` of `→`/`−` crashes on a cp1252 console after the run's files are written.
+- DCRNN training MAE rises after epoch ~25 because of scheduled sampling; judge it on validation only.
+- Run long GPU training from your own PowerShell window, not through Claude Code (its background reaper killed one run at epoch 45).
 - Validation contains Memorial Day (Mon 2012-05-28). Training has no US federal holidays.

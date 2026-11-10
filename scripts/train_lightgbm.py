@@ -17,7 +17,6 @@ Writes:
 from __future__ import annotations
 
 import json
-import subprocess
 import time
 
 import matplotlib
@@ -26,7 +25,6 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
-import psutil  # noqa: E402
 
 from flowcast import paths  # noqa: E402
 from flowcast.data.metr_la import FREQ  # noqa: E402
@@ -34,6 +32,16 @@ from flowcast.data.processed import owned_period  # noqa: E402
 from flowcast.evaluation.metrics import evaluate  # noqa: E402
 from flowcast.features.build import HORIZONS  # noqa: E402
 from flowcast.models.lgbm import BASE_PARAMS, group_permutation_importance, load_split, train  # noqa: E402
+from flowcast.reporting import (
+    COMPARISON,
+    FORECAST,
+    INK,
+    MODEL_FIGURE_STYLE,
+    SURFACE,
+    git_commit,
+    peak_memory_mb,
+    print_report,  # noqa: E402
+)
 
 ROOT = paths.PROJECT_ROOT
 SEARCH = ROOT / "models" / "metrics" / "lightgbm_search.json"
@@ -48,9 +56,6 @@ MAX_ROUNDS, PATIENCE = 6000, 100
 PERMUTATION_ROWS = 100_000
 FLOOR = "ar_residual"
 
-SURFACE, INK, INK_2, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#e4e3df"
-FORECAST, COMPARISON = "#2a78d6", "#a86f0c"  # architect.md §10 data hues
-
 
 def main() -> None:
     started = time.perf_counter()
@@ -63,15 +68,12 @@ def main() -> None:
     importance: dict = {}
     residuals: dict = {}
     preds: dict = {"validation": {}, "test": {}}
-    peak_rss = 0
 
     for h in HORIZONS:
         x, y, _ = load_split("train", h)
         xv, yv, mv = load_split("validation", h)
         t = time.perf_counter()
         booster = train(params, x, y, xv, yv, MAX_ROUNDS, PATIENCE)
-        mem = psutil.Process().memory_info()  # peak_wset: lifetime peak on Windows; rss elsewhere
-        peak_rss = max(peak_rss, getattr(mem, "peak_wset", mem.rss))
         fit_s = time.perf_counter() - t
         n_train = int(y.notna().sum())
         del x, y
@@ -141,51 +143,18 @@ def main() -> None:
         "results": results,
         "residuals_validation": residuals,
         "importance": importance,
-        "peak_rss_mb": peak_rss // 2**20,
+        "peak_rss_mb": peak_memory_mb(),
         "runtime_s": round(time.perf_counter() - started, 1),
     }
     METRICS.write_text(json.dumps(payload, indent=1), encoding="utf-8")
     figures(results, baselines, preds)
     CARD.write_text(card(payload, baselines), encoding="utf-8")
-    print(CARD.read_text(encoding="utf-8"))
-
-
-def git_commit() -> str:
-    try:
-
-        def git(*args: str) -> str:
-            return subprocess.run(["git", *args], capture_output=True, text=True, cwd=ROOT, check=True).stdout
-
-        dirty = git("status", "--porcelain", "--untracked-files=no").strip()
-        return git("rev-parse", "--short", "HEAD").strip() + (" + uncommitted changes" if dirty else "")
-    except (OSError, subprocess.CalledProcessError):
-        return "unknown"
+    print_report(CARD)
 
 
 def figures(results: dict, baselines: dict, preds: dict) -> None:
     FIGURES.mkdir(parents=True, exist_ok=True)
-    plt.rcParams.update(
-        {
-            "figure.facecolor": SURFACE,
-            "axes.facecolor": SURFACE,
-            "savefig.facecolor": SURFACE,
-            "axes.edgecolor": GRID,
-            "axes.labelcolor": INK_2,
-            "axes.titlecolor": INK,
-            "text.color": INK,
-            "xtick.color": INK_2,
-            "ytick.color": INK_2,
-            "grid.color": GRID,
-            "axes.grid": True,
-            "axes.axisbelow": True,
-            "axes.spines.top": False,
-            "axes.spines.right": False,
-            "font.size": 10,
-            "axes.titlesize": 11,
-            "axes.titleweight": "bold",
-            "axes.titlelocation": "left",
-        }
-    )
+    plt.rcParams.update(MODEL_FIGURE_STYLE)
     hours = np.arange(24)
     fig, axes = plt.subplots(1, 2, figsize=(11, 3.6), sharey=True)
     for ax, h in zip(axes, (3, 12), strict=True):

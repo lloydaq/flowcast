@@ -139,3 +139,47 @@ Groups are shuffled together because correlated features (e.g. `roll3_mean` and 
 - Only six configurations and one seed were tried; the L1-vs-L2 gap (~7%) is far larger than the spread between L2 configurations (~0.5%), so the choice is robust, but finer tuning was not attempted.
 - Peak memory of the final run was not recorded correctly (it was sampled after each fit); a separate full-data timing run peaked at about 2.8 GB. The script now records the true peak.
 - **Prediction intervals are deferred.** The plan allowed quantile or conformal intervals as optional; they need their own calibration check and are left for a later phase.
+
+## 4. DCRNN (Phase 6)
+
+A diffusion convolutional recurrent network ([model card](model_card_dcrnn.md)): a sequence-to-sequence GRU whose matrix products are replaced by diffusion over the published directed road graph (2 random-walk steps in each direction). One model forecasts all 12 steps; the four reported horizons are steps 3, 6, 9 and 12. Published METR-LA settings (hidden 64, 2 layers, Adam lr 0.01 with ×0.1 drops at epochs 20/30/40/50, scheduled sampling), not tuned here. 378,113 parameters. `scripts/train_dcrnn.py`; the side-by-side table is `scripts/compare_models.py` → [model_comparison.md](model_comparison.md).
+
+### Training
+
+100 epochs at ~134 s each, 224 minutes on the RTX 3050; GPU peak 1.8 GB, process peak 2.3 GB. Validation masked MAE over all 12 steps fell from 3.37 (epoch 1) to 2.764 (epoch 100) ([learning curve](figures/dcrnn/learning_curve.png)).
+
+- **Early stopping never triggered.** After the last learning-rate drop (epoch 50) validation still set a new best every few epochs, by about 0.001 mph, so the 10-epoch patience kept resetting and the 100-epoch cap ended the run. From epoch 60 to 100 the total gain was 0.005 mph: the cap cost nothing worth having.
+- **Training MAE rises from epoch ~25** (1.98 → 2.71). This is scheduled sampling, not overfitting: the decoder is fed its own earlier predictions instead of the truth more and more often, which makes the training task harder. Validation is always scored that way and kept improving.
+- An earlier run was killed by Windows memory pressure at epoch 45 with nothing saved. The script now saves the full training state after every epoch and accepts `--resume`; the run reported here completed without needing it.
+
+### Results
+
+| Split | Horizon | DCRNN MAE / RMSE | LightGBM MAE / RMSE | Floor MAE / RMSE |
+|---|---|---|---|---|
+| validation | 15 min | **2.44** / **4.78** | 2.53 / 4.96 | 3.15 / 5.50 |
+| validation | 30 min | **2.80** / **5.84** | 2.92 / 5.93 | 3.59 / 6.45 |
+| validation | 45 min | **3.04** / **6.50** | 3.18 / 6.56 | 3.83 / 6.98 |
+| validation | 60 min | **3.22** / 6.97 | 3.36 / **6.96** | 3.98 / 7.30 |
+| test | 15 min | **2.64** / **5.08** | 2.71 / 5.23 | 3.27 / 5.71 |
+| test | 30 min | **3.02** / **6.18** | 3.10 / 6.19 | 3.68 / 6.60 |
+| test | 45 min | **3.28** / 6.87 | 3.34 / **6.75** | 3.89 / 7.06 |
+| test | 60 min | **3.47** / 7.36 | 3.49 / **7.10** | 4.02 / 7.33 |
+
+**MAE:** DCRNN is lowest at every horizon on both splits. A day-block bootstrap of the gap to LightGBM (2,000 resamples) says the difference is real at 15, 30 and 45 minutes on both splits (test 15 min: better on 24 of 24 days) and **not distinguishable at 60 minutes** (the intervals cross 0). The gain shrinks with horizon: −0.08 mph at 15 min, −0.02 at 60 min on test.
+
+**RMSE:** mixed. DCRNN wins at short horizons but is worse than LightGBM at 45 and 60 min on test, and at 60 min on test its RMSE (7.36) is slightly *above* the AR floor (7.33). RMSE squares errors, so it is driven by the largest misses.
+
+### Where the gain comes from, and where it doesn't
+
+- **Congestion and rush hour.** Validation MAE on congested targets: 6.40 / 8.57 / 10.08 / 11.17 against LightGBM's 7.07 / 9.50 / 11.12 / 12.18, about 1 mph better at every horizon. Peak hours: 3.52 → 5.29 against 3.80 → 5.96. Free-flowing and off-peak traffic is nearly tied (within 0.05 mph). Seeing upstream sensors through the graph helps most exactly where traffic changes.
+- **Typical vs worst errors** (validation, 60 min residuals): DCRNN's middle 90% is tighter (p5–p95 −4.9 to +8.9 mph vs −5.7 to +9.8), but its tails are slightly wider (p1 −19.5 vs −18.8, p99 +31.5 vs +30.8). Better on the usual case, a little worse on the rare big misses, which is why MAE improves while long-horizon RMSE does not.
+
+### Verdict
+
+DCRNN is the most accurate model in MAE terms, 2–5% below LightGBM, clearly so up to 45 minutes. At 60 minutes it ties LightGBM on MAE and loses on RMSE. Phase 6's exit criterion (a side-by-side table, improvements claimed only where shown) is met; no blanket "DCRNN is better" claim is made.
+
+### Caveats
+
+- One seed for each learned model. The bootstrap intervals cover day-to-day variation in the data, not training randomness; a second DCRNN seed could move the 60-minute numbers either way.
+- Published hyperparameters, not tuned for this split. Validation was monitored for early stopping (in practice the epoch cap ended the run), so validation numbers are mildly optimistic; test was scored once.
+- Long-horizon tail errors (jam onsets the model does not foresee) remain the main weakness of every model so far.

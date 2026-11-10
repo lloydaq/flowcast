@@ -23,6 +23,9 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.6"]
+# Graph deep learning (Phase 6). Install the CUDA build first:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu126
+dl = ["torch>=2.5"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
