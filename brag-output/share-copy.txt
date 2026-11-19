@@ -1,0 +1,1 @@
+At 16:30 one LA freeway sensor read 68 mph. FlowCast said it'd be crawling at 14 by 17:00, and it was actually 22. Replay June 2012 and check every forecast against what really happened: lloydaq.github.io/flowcast
