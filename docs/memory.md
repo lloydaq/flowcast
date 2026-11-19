@@ -2,7 +2,7 @@
 
 Persistent context for anyone continuing this project: the developer, another engineer, Claude Code or ChatGPT. Read this first. It records **verified facts, decisions and conventions** that are not obvious from the code. Update it at the end of every phase.
 
-Last updated: 2026-11-19 (Phases 0–10 complete; v1.0.0 released). Current state: the roadmap in [phases.md](phases.md) is finished and the demo is live at https://lloydaq.github.io/flowcast/. No phase is in progress; see **Open items** below for what was deferred.
+Last updated: 2026-11-19 (Phases 0–10 complete; v1.0.0 released). Current state: the roadmap in [phases.md](phases.md) is finished and the demo is live at https://lloydaq.github.io/flowcast/. No phase is in progress; Phases 11–16 are proposed in phases.md, and **Open items** below lists what was deferred.
 
 ## Hard constraints
 
