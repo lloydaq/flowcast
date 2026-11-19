@@ -17,6 +17,14 @@ Related: [architect.md](architect.md) · [memory.md](memory.md)
 | 8 | Frontend (React) | ✅ done | see git log |
 | 9 | Integration and testing | ✅ done | see git log |
 | 10 | Deployment and open-source release | ✅ done | see git log |
+| 11 | "Paint a jam": in-browser DCRNN sandbox | 📝 proposed | – |
+| 12 | Shockwave tracker and corridor diagram | 📝 proposed | – |
+| 13 | Honest uncertainty (adaptive conformal intervals) | 📝 proposed | – |
+| 14 | Sensor blackout lab and placement | 📝 proposed | – |
+| 15 | Why this forecast? (graph attribution) | 📝 proposed | – |
+| 16 | Cross-city test on PEMS-BAY | 📝 proposed | – |
+
+**Suggested order after v1.0:** 13 → 12 → 11, then 14, 15, 16. Phase 13 adds error bars that the later phases reuse; 12 delivers the corridor diagram left out of Phase 8; 11 benefits from both. The same rules apply as before: ₹0, no tuning on the test set, numbers only from committed JSON, one report per phase.
 
 ---
 
@@ -148,3 +156,65 @@ Result: a static demo on GitHub Pages (https://lloydaq.github.io/flowcast/) that
 
 - Reproducible setup docs, a GitHub Actions CI, and a free hosting option (static precomputed demo vs free-tier backend: decide here).
 - README with real results, screenshots, a short demo GIF, and a v1.0 GitHub release.
+
+---
+
+# After v1.0 — proposed phases
+
+Nothing below has been started. Each phase must still meet the hard constraints in [memory.md](memory.md): ₹0, the RTX 3050 6 GB, no fabricated results, no training or tuning on the test set.
+
+## Phase 11 — "Paint a jam": in-browser DCRNN sandbox 📝
+
+**Goal:** the static demo runs the real model live. A visitor drags a sensor's current speed down (or paints a slow stretch on the map) and watches the 5–60 min forecast spread through the network. Still no server.
+
+- Check the DCRNN's parameter count and graph-op support first; if the diffusion convolution does not export cleanly, write it with plain matrix products (the support matrices are fixed).
+- Export to ONNX (opset pinned), run with ONNX Runtime Web (WASM; WebGPU only if available). Load the model lazily so the existing screens do not get slower.
+- Sandbox screen: start from a real replay window, edit inputs, show forecast vs the untouched forecast side by side. Label it clearly as a what-if, not a measurement.
+- Fits the static CSP (`wasm-unsafe-eval` only if ORT needs it; recorded in [security.md](security.md)).
+- **Exit:** browser output matches PyTorch within 0.01 mph on 200 sampled test windows; one forecast step p95 < 100 ms on the desktop and measured (reported, not gated) on a throttled phone profile; Lighthouse accessibility stays ≥ 95; e2e flow for the sandbox in `e2e:static`.
+
+## Phase 12 — Shockwave tracker and corridor diagram 📝
+
+**Goal:** detect congestion wave fronts moving upstream along the directed graph, measure their speed, and project where each front will be in 30 min. Builds the corridor time-space diagram left out of Phase 8.
+
+- Corridors: ordered chains of sensors along the published directed adjacency (no invented links); document how they were chosen.
+- Front detection on the training period: onset of congestion (the shared definition in `congestion.py`) propagating sensor to sensor; wave speed from a robust fit over (distance, onset time).
+- Projection: extend the fitted front 15/30 min ahead; compare with the DCRNN's own forecast of where congestion will be.
+- UI: time-space diagram per corridor (speed as the single red ramp), fitted fronts as lines, projection dashed.
+- **Exit:** the distribution of measured wave speeds reported with its spread and compared, as a sanity check, with values in the traffic-flow literature (cited); projected front positions scored on validation, then once on test, against a "front stays where it is" baseline; the diagram passes the inspector at 1440 / 768 / 390.
+
+## Phase 13 — Honest uncertainty (adaptive conformal intervals) 📝
+
+**Goal:** prediction intervals the UI can show without misleading anyone. Closes the item deferred in Phase 5.
+
+- Split conformal per horizon on validation residuals, then an adaptive variant (e.g. adaptive conformal inference) that updates as the replay advances, since missingness and behaviour shift between periods.
+- Report coverage and width by slice: horizon, peak / off-peak, congested, high-missingness sensors.
+- UI: interval band on the Sensor screen; a "trust map" layer shading sensors by interval width. Drawn only where calibration holds.
+- **Exit:** 90% intervals cover 88–92% on validation for every horizon; coverage per slice reported, with any failing slice named in the docs and hidden or flagged in the UI; test coverage computed once and recorded.
+
+## Phase 14 — Sensor blackout lab and placement 📝
+
+**Goal:** measure how forecasts degrade when sensors go dark, then answer "if the city could keep only N sensors, which ones?"
+
+- Knock-out schemes: random, worst-case (greedy), and replaying the real outage patterns from the test period onto other days.
+- Models scored as-is on the remaining inputs (no retraining), plus one retrained point to show the gap.
+- Placement: greedy selection of the sensors whose removal hurts validation MAE least; stability checked across bootstrap resamples.
+- **Exit:** curve of MAE vs sensors kept, with 95% day-block bootstrap intervals; a ranked keep-list with its stability; all choices made on validation, test scored once for the final list.
+
+## Phase 15 — Why this forecast? (graph attribution) 📝
+
+**Goal:** show which upstream sensors and time steps drove a forecast, as arrows on the map.
+
+- Integrated gradients on the DCRNN (baseline input documented: e.g. the historical average, not zeros, since 0 means missing).
+- Aggregate to per-sensor, per-lag attributions; precompute for the static demo at the replay times it offers.
+- **Exit:** a deletion test — removing the top-k attributed inputs changes the forecast more than removing k random ones (and more than removing the k nearest), with bootstrap intervals; attributions are consistent with the graph direction (upstream dominates) or the docs say where they are not.
+
+## Phase 16 — Cross-city test on PEMS-BAY 📝
+
+**Goal:** does a model trained on Los Angeles work in the Bay Area?
+
+- Acquire PEMS-BAY (325 sensors) from a free source, verified like Phase 1 (units, missingness, adjacency direction) before use; record it in [dataset.md](dataset.md).
+- Zero-shot: LightGBM features are sensor-agnostic except the node id and per-sensor statistics (recomputed from PEMS-BAY training data); DCRNN weights are size-independent of the node count, run on the new adjacency.
+- Fine-tuned: a small number of epochs on PEMS-BAY training data, within the 6 GB budget.
+- Baselines from Phase 4 run on PEMS-BAY for the floor.
+- **Exit:** same masked metrics, same rows-for-all-models rule and same day-block bootstrap; a table of zero-shot vs fine-tuned vs trained-from-scratch-in-budget, and an honest verdict.

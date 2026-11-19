@@ -2,7 +2,7 @@
 
 Persistent context for anyone continuing this project: the developer, another engineer, Claude Code or ChatGPT. Read this first. It records **verified facts, decisions and conventions** that are not obvious from the code. Update it at the end of every phase.
 
-Last updated: 2026-11-08 (Phase 5 complete). Current state: Phase 6 (graph deep learning) is next. See [phases.md](phases.md).
+Last updated: 2026-11-19 (Phases 0–10 complete; v1.0.0 released). Current state: the roadmap in [phases.md](phases.md) is finished and the demo is live at https://lloydaq.github.io/flowcast/. No phase is in progress; Phases 11–16 are proposed in phases.md, and **Open items** below lists what was deferred.
 
 ## Hard constraints
 
@@ -68,6 +68,12 @@ Last updated: 2026-11-08 (Phase 5 complete). Current state: Phase 6 (graph deep 
 | 2026-11-10 | E2E with Playwright on the installed Chrome (`channel: "chrome"`), one worker, servers reused if running | No browser download; one API process; quiet perf numbers |
 | 2026-11-10 | Security headers set by the API itself; CSP, HSTS and rate limiting left to the Phase 10 host | The API serves JSON only; the frontend's host decides its own headers |
 | 2026-11-10 | Public demo: fully static on GitHub Pages (`gh-pages` branch, force-replaced on each deploy) | The replay is a fixed past; ₹0, no cold starts, no memory limit; FastAPI stays for local use |
+| 2026-11-10 | Static demo rebuilds API answers in the browser (`staticApi.ts`) from `export_static.py` output: small answers as API JSON, forecasts and speeds as per-day uint16 grids (25 MB) | One code path for the UI; checked equal to 80 sampled real API answers |
+| 2026-11-10 | CSP on Pages is a `<meta>` tag with the hash of the one inline script | Pages cannot send custom headers |
+| 2026-11-10 | API `congested` flag judges the forecast as returned (rounded to 2 decimals) | A client can reproduce the flag exactly from the response |
+| 2026-11-10 | Each demo route gets its own HTML page in the static build | Pages served deep links through its 404 fallback (status 404 breaks link previews and crawlers) |
+| 2026-11-10 | The static build compiles without exported data (CI builds it that way) | CI has no data; the real deploy still needs `export_static.py` first |
+| 2026-11-10 | CI (GitHub Actions): ruff, pytest, OpenAPI schema sync, frontend type-check / unit tests / builds. E2E and the static-equivalence test run locally only | They need the ~230 MB data and the trained models, which are not in the repository |
 
 ## Conventions
 
@@ -91,9 +97,13 @@ python scripts/train_dcrnn.py       # DCRNN on GPU, ~134 s/epoch, 100 epochs (~3
 python scripts/compare_models.py    # docs/model_comparison.md + models/metrics/comparison.json
 uvicorn flowcast.api.app:app        # API (store loads in ~1 s); docs at /docs
 python scripts/benchmark_api.py     # latency over HTTP -> models/metrics/api_latency.json
-pytest                              # 122 tests at end of Phase 9
+pytest                              # 122 tests (incl. 31 API security tests) at v1.0.0
 cd frontend; npm run e2e            # 21 Playwright flows; npm run e2e:perf for the map timings
-cd frontend; npm run dev            # dashboard on :5173 (needs the API on :8000); npm test, npm run typecheck
+cd frontend; npm run dev            # dashboard on :5173 (needs the API on :8000); npm test (10 unit tests), npm run typecheck
+python scripts/export_static.py     # static demo data -> frontend/.static/ (needed before build:static / deploy)
+cd frontend; npm run build:static ; npm run preview:static   # static demo on :4174 under /flowcast/
+cd frontend; npm run e2e:static     # the e2e flows against the static build (desktop + phone)
+cd frontend; npm run deploy         # publish dist-static to the gh-pages branch
 ruff check . ; ruff format --check .
 ```
 
@@ -113,7 +123,7 @@ ruff check . ; ruff format --check .
 - DCRNN training MAE rises after epoch ~25 because of scheduled sampling; judge it on validation only.
 - Run long GPU training from your own PowerShell window, not through Claude Code (its background reaper killed one run at epoch 45).
 - The API store indexes time by row position, so the speed matrix must be a gap-free 5-minute grid (checked at load).
-- The API needs `data/processed/` and the saved test predictions; they are git-ignored, so deployment (Phase 10) must ship or rebuild them.
+- The API needs `data/processed/` and the saved test predictions; they are git-ignored. The public demo avoids this by shipping `export_static.py` output; a hosted API would have to ship or rebuild them.
 - `vite preview` binds to `localhost` (IPv6), not 127.0.0.1: point tools at http://localhost:4173.
 - CARTO basemap tiles now answer "API key required"; the map uses greyscale OSM tiles.
 - After any API schema change run `python scripts/export_openapi.py`, then `npm run api:types` in frontend/.
@@ -122,3 +132,11 @@ ruff check . ; ruff format --check .
 - The static build's CSP hashes the inline theme script after CRLF→LF, as browsers do; a Windows checkout otherwise breaks the hash.
 - `npm run deploy` needs `python scripts/export_static.py` first; the static preview is on :4174 under /flowcast/.
 - Validation contains Memorial Day (Mon 2012-05-28). Training has no US federal holidays.
+
+## Open items (after v1.0.0)
+
+- **Prediction intervals**: deferred in Phase 5; need a calibration check on validation before the UI may draw them.
+- **Corridor time-space diagram**: the Phase 8 stretch goal, not built.
+- **Hosted API hardening**: CSP, HSTS and rate limiting were left to the host. The static demo needs none of them; a public FastAPI deployment would need all three.
+- **DCRNN at 60 min**: tied with LightGBM on MAE and worse on long-horizon RMSE; no tuning run was affordable (~3.7 h per run).
+- **Holidays**: training has none; validation has Memorial Day. Holiday behaviour is unmodelled.
